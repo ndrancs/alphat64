@@ -1,0 +1,35 @@
+#!/bin/dash
+BLACKLIST=/etc/modprobe.d/wl.conf
+
+case "$1" in
+	start)
+		! [ -e $BLACKLIST ] && echo blacklist b43 > $BLACKLIST
+		rmmod b43
+		rmmod wl
+		rmmod ssb_hcd
+		rmmod ssb
+		rmmod brcmsmac
+		rmmod bcma
+		rmmod lib80211
+		rmmod mac80211
+		rmmod cfg80211
+		modprobe lib80211
+		modprobe cfg80211
+		insmod /usr/share/broadcom/wl.ko
+		;;
+
+	stop)
+		rm -f $BLACKLIST
+		echo -n "Nothing to stop"
+		;;
+	
+	restart)
+		echo -n "Nothing to restart"
+		;;
+ 	
+	status)
+		lsmod | grep -q "^wl " && echo "BC-wl is running." || echo "BC-wl is stopped."
+		;;		
+ 
+esac
+unset BLACKLIST

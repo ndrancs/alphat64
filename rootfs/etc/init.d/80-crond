@@ -1,0 +1,41 @@
+#!/bin/dash
+# jamesbond 2012
+
+start_cron() {
+	echo "Starting task scheduler."
+	[ ! -e /var/spool/cron/crontabs ] && ln -sfT /etc/crontabs /var/spool/cron/crontabs
+	crond
+}
+
+stop_cron() {
+	echo "Stopping task scheduler."
+	if [ -e /var/run/crond.pid ]; then
+		kill $(cat /var/run/crond.pid)
+		rm /var/run/crond.pid
+	fi
+}
+
+is_up_cron() {
+	test -e /var/run/crond.pid
+}
+
+case $1 in
+	start)
+		start_cron
+		;;
+		
+	stop)
+		stop_cron
+		;;
+		
+	restart)
+		stop_cron
+		sleep 1
+		start_cron
+		;;
+		
+	status)
+		is_up_cron && echo "crond is running." || echo "crond is stopped."
+		;;		
+		
+esac

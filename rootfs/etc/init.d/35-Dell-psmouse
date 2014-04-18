@@ -1,0 +1,24 @@
+#!/bin/dash
+
+case "$1" in
+	start)
+		
+		rmmod psmouse
+		insmod /usr/share/Dell/psmouse.ko
+		touch /tmp/psmouse.ko
+		;;
+
+	stop)
+		echo -n "Nothing to stop"
+		;;
+	
+	restart)
+		echo -n "Nothing to restart"
+		;;
+ 	
+	status)
+		[ -e /tmp/psmouse.ko ] && echo "Dell-psmouse is running." || echo "Dell-psmouse is stopped."
+		;;		
+ 
+esac
+unset BLACKLIST

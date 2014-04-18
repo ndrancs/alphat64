@@ -1,0 +1,62 @@
+#!/bin/dash 
+
+CONFPATH="/etc/autochown.conf"
+PIDFILE="/run/autochown.pid"
+MAXWATCHES=32768
+
+start_autochown() {
+	# make sure we can actually chown files in Downloads
+	touch /root/spot/Downloads/test-autochownd-99
+	chown spot /root/spot/Downloads/test-autochownd-99
+	if [ "$(ls -l /root/spot/Downloads/test-autochownd-99 | cut -d "/" -f 1 | grep spot)" = "" ] ; then
+		echo "autochownd exiting"
+		rm /root/spot/Downloads/test-autochownd-99
+		exit
+	fi
+	rm /root/spot/Downloads/test-autochownd-99
+	
+	# make sure 1st line always contains the Downloads folder
+	CMD="> spot:spot::$(realpath /root/spot/Downloads)"
+	! [ -e $CONFPATH ] && echo "$CMD" > $CONFPATH
+	grep -qF "$CMD" $CONFPATH || sed -i -e "1 s|^.*$|$CMD|" $CONFPATH
+	
+	# increase watch limit if needed
+	read p < /proc/sys/fs/inotify/max_user_watches
+	[ $p -lt $MAXWATCHES ] && echo $MAXWATCHES > /proc/sys/fs/inotify/max_user_watches
+	
+	# start the daemon
+	autochown -d -p $PIDFILE $CONFPATH
+}
+
+stop_autochown() {
+	read pid < $PIDFILE
+	kill $pid
+	sleep 1
+    kill -0 $pid 2>/dev/null && kill -9 $pid
+    rm -f $PIDFILE
+}
+
+is_up_autochown() {
+	test -e "$PIDFILE"
+}
+
+case $1 in
+  start) 
+	start_autochown 
+	;;
+	
+  stop) 
+	stop_autochown 
+	;;
+	
+  restart)
+    stop_autochown
+    sleep 1
+    start_autochown
+    ;;
+
+  status)
+	is_up_autochown && echo "autochownd is running." || echo "autochownd is stopped."
+    ;;
+esac
+

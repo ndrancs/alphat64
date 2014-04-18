@@ -1,0 +1,119 @@
+#!/bin/dash
+# ram-save 
+# performs periodic saving of RAM layer to savefile, when using RAM layer
+# otherwise it will exit immediately
+#
+# Copyright (C) James Budiono 2012, 2013
+# License: GNU GPL Version 3 or later
+#
+
+### configuration
+PERIOD=10	# in seconds, how often the daemon wakes up
+SERVICE=ram-save
+PIDFILE=/tmp/${SERVICE}.pid
+EVENTMANAGER_CONFIG=/etc/eventmanager
+
+# load boot-time configuration
+. $BOOTSTATE_PATH		# boot-time configuration
+. $EVENTMANAGER_CONFIG	# RAMSAVEINTERVAL
+
+# "signal" files that pup_event_frontend_d uses to communicate with other processes
+F_SNAPMERGE_REQUEST=/tmp/snapmergepuppy.request	# with save2flash & calcfreespace.sh
+F_SNAPMERGE_COUNTER=/tmp/snapmergepuppy.counter	# internal - countdown counter for snapmerge
+
+######### helper #########
+# find the first local X server, construct DISPLAY variable
+get_DISPLAY() {
+	export DISPLAY=$(ls /tmp/.X*-lock 2> /dev/null | head -n 1 | sed 's/-lock//; s/.*\.//; s/X/:/')
+}
+
+snapmerge() {
+	local XPID=""
+	
+	! [ "$TMPFS_MOUNT" -a "$SAVEFILE_MOUNT" ] && return
+	get_DISPLAY
+	if [ "$DISPLAY" ]; then 
+		yaf-splash -font "8x16" -outline 0 -margin 4 -bg orange -placement top -text "Saving RAM to savefile ..." &
+		XPID=$!
+	fi
+	
+	sync
+	nice -n 19 fatdog-merge-layers.sh "$TMPFS_MOUNT" "$SAVEFILE_MOUNT" 1>&2
+	[ $XPID ] && kill $XPID
+}
+
+reset_counter() {
+	echo $(( $RAMSAVEINTERVAL * 60 / $PERIOD )) > $F_SNAPMERGE_COUNTER # convert RAMSAVEINTERNAL to our interval period	
+}
+
+ram_save_daemon() {
+	while true; do
+		sleep $PERIOD
+		. $EVENTMANAGER_CONFIG	# RAMSAVEINTERVAL - reload every time so response is immediate
+				
+		# save RAM layer - explicit request
+		[ -e "$F_SNAPMERGE_REQUEST" ] && { snapmerge; rm -f $F_SNAPMERGE_REQUEST; }
+
+		# save RAM layer - periodic save
+		if [ "$TMPFS_MOUNT" -a "$SAVEFILE_MOUNT" -a $RAMSAVEINTERVAL -ne 0 ]; then
+			read snapmerge_counter < $F_SNAPMERGE_COUNTER
+			case $snapmerge_counter in
+				0|"") snapmerge
+					  reset_counter ;;
+				*)    echo $(( $snapmerge_counter - 1 )) > $F_SNAPMERGE_COUNTER ;;
+			esac
+		fi	
+	done	
+}
+
+#### service control
+
+start_ramsave() {
+	if [ -e $PIDFILE ]; then
+		echo "$SERVICE is already running."
+	else
+		if [ "$TMPFS_MOUNT" -a "$SAVEFILE_MOUNT" ]; then
+			echo "$SERVICE starting."
+			reset_counter
+			ram_save_daemon &
+			echo $! > $PIDFILE
+		fi
+	fi
+}
+
+stop_ramsave() {
+	if [ -e $PIDFILE ]; then
+		kill $(cat $PIDFILE)
+		rm -f $PIDFILE
+		echo "$SERVICE stopped."
+	fi
+}
+
+is_up_ramsave() {
+	test -e $PIDFILE
+}
+
+case $1 in
+	start)
+		start_ramsave
+		;;
+
+	stop)
+		stop_ramsave
+		;;
+		
+	restart)
+		stop_ramsave
+		sleep 1
+		start_ramsave
+		;;
+		
+	status)
+		is_up_ramsave && echo "$SERVICE is running." || echo "$SERVICE is stopped."
+		;;		
+
+	*)
+		echo "Usage: ${0##*/} {start|stop|restart|status}"
+		exit 2
+		;;
+esac

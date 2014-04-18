@@ -1,0 +1,43 @@
+#!/bin/dash
+# Start/stop/restart the hal daemon:
+
+PIDFILE=/var/run/hald/pid
+
+hal_start() {
+    echo "Starting HAL daemon:  /usr/sbin/hald --daemon=yes"
+    /usr/sbin/hald --daemon=yes
+}
+
+hal_stop() {
+  if [ -e "$PIDFILE" ]; then
+    kill $(cat $PIDFILE)
+    rm -f $PIDFILE
+  fi
+  # Just in case:
+  killall hald 1> /dev/null 2> /dev/null
+}
+
+is_up_hal() {
+	test -e "$PIDFILE"
+}
+
+case "$1" in
+    start)
+        hal_start
+        ;;
+    stop)
+        hal_stop
+        ;;
+    restart)
+        hal_stop
+	sleep 1
+        hal_start
+        ;;
+    status)
+		is_up_hal && echo "hald is running." || echo "hald is stopped."
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        ;;
+esac
+

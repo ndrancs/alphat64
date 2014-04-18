@@ -1,0 +1,23 @@
+name="proxychains-ng"
+version="4.7"
+revision="1"
+category="development"
+description="a hook preloader that allows to redirect TCP traffic of existing dynamically linked programs through one or more SOCKS or HTTP proxies"
+source="http://downloads.sourceforge.net/project/$name/proxychains-$version.tar.bz2"
+homepage="https://github.com/rofl0r/proxychains"
+maintainer="ndrancs <ndrancs@gmail.com>"
+depends=""
+makedepends=""
+
+compile() {
+  cd proxychains-$version
+  ./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc
+  make
+}
+
+package() { 
+  make DESTDIR=$destdir install
+  make DESTDIR=$destdir install-config
+}

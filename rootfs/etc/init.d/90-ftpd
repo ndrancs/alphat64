@@ -1,0 +1,35 @@
+#!/bin/dash
+
+start_pureftpd() {
+	chmod 777 /dev/null
+	pure-ftpd -EbBADHk 90
+}
+
+stop_pureftpd() {
+	while pidof pure-ftpd > /dev/null; do killall pure-ftpd 2>/dev/null; done
+}
+
+is_up_pureftpd() {
+	pidof pure-ftpd > /dev/null
+}
+
+case "$1" in
+	start)
+		start_pureftpd
+		;;
+
+	stop)
+		stop_pureftpd
+		;;
+	
+	restart)
+		stop_pureftpd
+		sleep 1
+		start_pureftpd
+		;;
+		
+	status)
+		is_up_pureftpd && echo "Pure-ftpd is running." || echo "Pure-ftpd is stopped."
+		;;		
+
+esac

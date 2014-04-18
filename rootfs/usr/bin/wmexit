@@ -1,0 +1,73 @@
+#!/bin/ash
+# wmexit - command to exit from X
+# Copyright (C) James Budiono 2012
+# License: GNU GPL Version 3
+# Note: a replacement for wmpoweroff, wmreboot and others
+#
+# parameter: $1 - action, $2 - optional wm, $3 - optional panel
+# action is: poweroff/shutdown, reboot, restart, xorgwizard, terminal, logout
+
+### configuration
+WINDOW_MANAGER_CONFIG=$FATDOG_STATE_DIR/windowmanager
+WINDOW_PANEL_CONFIG=$FATDOG_STATE_DIR/windowpanel
+. $BOOTSTATE_PATH
+
+### configuration
+F_EXIT_REASON=/tmp/wmexitmode.$USER.txt	# talk back to xwin of why we're exiting
+F_WINDOW_MANAGER_PID=/tmp/xinitrc-wm.pid.$USER.$XSESSION_ID		# defined by xinitrc
+F_WINDOW_PANEL_PID=/tmp/xinitrc-panel.pid.$USER.$XSESSION_ID	# defined by xinitrc
+F_NO_FREEMEM_APPLET=/tmp/xinitrc-no-freemem.$USER.$XSESSION_ID	# defined by xinitrc
+F_XSERVER_PID=/tmp/xinitrc-Xserver.pid.$USER	# defined by xserverrc
+
+### utilities - stop X server 
+# stop by stopping the window manager if possible (this is more polite)
+# kill X if it's not possible
+stop_X() {
+	local wm_pid="" panel_pid="" xserver_pid=""
+	
+	[ -e $F_WINDOW_MANAGER_PID ] && read wm_pid < $F_WINDOW_MANAGER_PID
+	[ -e $F_WINDOW_PANEL_PID ] && read panel_pid < $F_WINDOW_PANEL_PID
+	[ -e $F_XSERVER_PID ] && read xserver_pid < $F_XSERVER_PID
+	rm -f $F_NO_FREEMEM_APPLET
+	
+	if [ "$wm_pid" -o "$panel_pid" ]; then
+		rm -f $F_WINDOW_MANAGER_PID $F_WINDOW_PANEL_PID
+		kill $wm_pid $panel_pid
+		
+	elif [ $xserver_pid ]; then
+		rm -f $F_XSERVER_PID
+		kill $xserver_pid
+		
+	else
+		killall X
+		sleep 2
+		pidof X && killall -9 X
+	fi
+}
+
+
+########## main ############
+case $1 in 
+	poweroff|shutdown)
+		# handle directly
+		[ $(id -u) -ne 0 ] && exec gtksu "Power-off" "$0" $1
+		/sbin/poweroff
+		;;
+		
+	reboot)
+		# handle directly
+		[ $(id -u) -ne 0 ] && exec gtksu "Reboot" "$0" $1
+		/sbin/reboot
+		;;
+	
+	restart|xorgwizard|terminal|logout)
+		# let xwin handle this
+		[ $2 ] && echo $2 > $WINDOW_MANAGER_CONFIG
+		[ $3 ] && echo $3 > $WINDOW_PANEL_CONFIG
+		echo $1 > $F_EXIT_REASON
+		stop_X
+		;;
+	*)	# unknown parameter, try help
+		echo "Usage: wmexit shutdown|poweroff|reboot|restart|terminal|logout|xorgwizard"
+		;;
+esac

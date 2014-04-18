@@ -1,0 +1,122 @@
+#!/bin/dash
+
+### configuration
+. $BOOTSTATE_PATH
+[ "$CONFIGURED_NET" ] && exit # leave if network already configured at boot
+UP_FLAG=/tmp/50-wpagui-up
+APPTITLE=${0##*/}
+MAX_RETRY=15 # 15 seconds
+
+### start/stop routines
+start_loopback() {
+	ifconfig lo up
+	ifconfig lo 127.0.0.1
+	route add -net 127.0.0.0 netmask 255.0.0.0 lo 2> /dev/null
+}
+
+start_wired_autodhcp() {
+	local TIMEOUT=$MAX_RETRY
+
+	while [ $TIMEOUT -ge 0 ]; do
+		for IFACE in $(ls /sys/class/net); do case $IFACE in
+			lo|teredo) ;; # ignore
+			*) 
+				if ! iwconfig | grep -q "^$IFACE"; then # not wireless
+					# start dhcp, but only if not configured by network wizard/network-setup
+					read ADDR < /sys/class/net/$IFACE/address				
+					if ! [ -f /etc/network-setup/ip/$IFACE ] && 
+					   ! [ -f /etc/network-wizard/network/interfaces/$ADDR.conf ]; then
+						echo $APPTITLE - auto dhcp for $IFACE
+						ifconfig $IFACE up; dhcpcd -L -h $(hostname) $IFACE &
+					else
+						echo $APPTITLE - $IFACE will be configured by network-wizard
+					fi
+					break 2
+				fi
+		esac; done
+		TIMEOUT=$((TIMEOUT-1))
+	done
+}
+
+start_wireless() {
+	local TIMEOUT=$MAX_RETRY
+
+	while [ $TIMEOUT -ge 0 ]; do
+		for IFACE in $(ls /sys/class/net); do case $IFACE in
+			lo|teredo) ;; # ignore
+			*) 
+				if iwconfig | grep -q "^$IFACE"; then
+					echo $APPTITLE - loading wpa_supplicant for $IFACE
+					ifconfig $IFACE up; wpa_supplicant -i$IFACE -c/etc/wpa_supplicant.conf -B
+					break 2
+				fi
+		esac; done
+		TIMEOUT=$((TIMEOUT-1))
+	done
+
+	if ! pidof wpa_cli > /dev/null; then
+		wpa_cli -a dhcpcd-wpagui &
+	fi
+}
+
+stop_wireless() {
+
+	killall wpa_cli
+	killall dhcpcd-wpagui
+	killall dhcpcd
+	killall wpa_supplicant	
+
+	ls /sys/class/net | while read IFACE; do 
+	case $IFACE in
+		lo|teredo) ;; # ignore
+		*)
+			if iwconfig | grep -q "^$IFACE"; then 
+				echo $APPTITLE - turning off $IFACE
+				ifconfig $IFACE down
+			else			
+				# only do it for interfaces not configured by network wizard/network-setup
+				read ADDR < /sys/class/net/$IFACE/address
+				if ! [ -f /etc/network-setup/ip/$IFACE ] && 
+				   ! [ -f /etc/network-wizard/network/interfaces/$ADDR.conf ]; then
+					echo $APPTITLE - turning off $IFACE
+					ifconfig $IFACE down
+				else
+					echo $APPTITLE - $IFACE will be turned off by network-wizard
+				fi
+			fi
+	esac; done
+}
+
+### main
+case "$1" in
+	start)
+		start_loopback 					# ALWAYS setup loopback - do it before exit check
+	    [ ! -f /etc/wpagui ] && exit 	# leave if we are not wanted
+	    
+		start_wired_autodhcp
+		start_wireless
+	    touch $UP_FLAG		  			# indicate startup		
+		;;
+
+	stop) #called at shutdown and if quit is selected on wpa_gui
+		stop_wireless
+		rm -f $UP_FLAG		
+		;;
+
+	restart) #called from wpa_gui right click menu
+	    touch /etc/wpagui # If restart called assume we don't want wpa disabled.
+	    
+		stop_wireless
+		killall wpa_gui
+		sleep 2
+		
+		start_wireless
+		exec wpa_gui -t &
+	    touch $UP_FLAG		  			# indicate startup		
+		;;
+		
+	status)
+		[ -e $UP_FLAG ] && echo "Wpagui is running." || echo "Wpagui is stopped."
+		;;		
+
+esac

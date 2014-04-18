@@ -1,0 +1,13 @@
+# /etc/fstab: static file system information.
+#
+# <file system> <mount pt>     <type>	<options>         <dump> <pass>
+# /dev/root		/				ext2	rw,noauto		0		1	# mounted by /init
+# proc			/proc			proc	defaults			0		0	# mounted by /init
+# sysfs			/sys			sysfs	defaults			0		0	# mounted by /init
+devpts			/dev/pts			devpts	defaults,gid=5,mode=620	0	0
+tmpfs			/dev/shm		tmpfs	mode=0777		0		0
+tmpfs			/tmp			tmpfs	defaults			0		0
+cgroup			/sys/fs/cgroup	cgroup	defaults			0		0
+#/usr/lib64		/usr/lib		bind	defaults,bind	0		0
+#/usr/X11R7/lib64 /usr/X11R7/lib	bind	defaults,bind	0		0
+/dev/fd0			/mnt/floppy		auto	noauto,rw		0		0

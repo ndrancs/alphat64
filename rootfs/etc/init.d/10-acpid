@@ -1,0 +1,43 @@
+#!/bin/dash
+# jamesbond
+# re-written for Fatdog64 622 
+
+PIDFILE=/var/run/acpid.pid
+
+start_acpid() {
+	[ -e /proc/acpi ] && /usr/sbin/acpid -p $PIDFILE
+}
+
+stop_acpid() {
+	[ -e $PIDFILE ] && kill $(cat $PIDFILE)
+}
+
+is_up_acpid() {
+	test -e $PIDFILE > /dev/null 
+}
+
+case $1 in
+	start)
+		start_acpid
+		;;
+
+	stop)
+		stop_acpid
+		;;
+		
+	restart)
+		stop_acpid
+		sleep 1
+		start_acpid
+		;;
+		
+	status)
+		is_up_acpid && echo "acpid is running." || echo "acpid is stopped."
+		;;
+
+	*)
+		echo "Usage: $0 {start|stop|restart|status}"
+		exit 2
+		;;
+esac
+

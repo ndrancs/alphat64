@@ -1,0 +1,9 @@
+# /etc/modules
+#
+# This file contains a list modules to be loaded by the system.
+# Modules listed here will always be loaded regardless of whether they are
+# required. List one module per line. Anything after hash mark is a comment.
+#
+# Note: Modules listed here take precedence over module blacklist;
+#       they will *always* be loaded regardless of blacklist.
+#

@@ -1,0 +1,10 @@
+#!/bin/ash
+# snapmergepuppy - merge tmpfs layer to savefile layer
+# Copyright (C) James Budiono 2011, 2012
+# License: GNU GPL Version 3 or later
+#
+# This is a now just a compatibility shell. Actual work is done in fatdog-merge-layers.sh
+
+. $BOOTSTATE_PATH
+! [ "$TMPFS_MOUNT" -a "$SAVEFILE_MOUNT" ] && exit 
+exec /usr/sbin/fatdog-merge-layers.sh "$TMPFS_MOUNT" "$SAVEFILE_MOUNT"

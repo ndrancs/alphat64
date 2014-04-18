@@ -1,0 +1,177 @@
+# /etc/profile - executed by login shell
+# originally from Puppy Linux, this file is re-written for Fatdog64 600
+# Copyright (C) James Budiono 2012,2013,2014 with bits and pieces are from original authors, as noted, and licensed differently
+# License: GNU GPL Version 3 or later
+# 
+# boot time parameters handled:
+# - pfix=xorgwizard - start xorgwizard before launching desktop
+# - pfix=nox - don't start X automatically
+#
+# Note: this file is sourced by login shell, do "return" instead of "exit"
+
+### configuration
+export BOOTSTATE_PATH=/etc/BOOTSTATE
+export FATDOG_STATE_DIR=$HOME/.fatdog	# Fatdog state directory
+LANG_CONFIG=$FATDOG_STATE_DIR/language	# defined by chooselocale
+TZ_CONFIG=$FATDOG_STATE_DIR/timezone	# no app manages this at the moment
+
+# defaults
+LANG=en_US
+TZ=":/etc/localtime"            # use whatever is specified in /etc/localtime
+EDITOR=mp                       # console editor, changed by xinitrc to geany
+OUTPUT_CHARSET=UTF-8            # default output charset for gettext
+TEXTDOMAINDIR=/usr/share/locale # default location for localised messages
+
+############# per-user settings ###############
+
+mkdir -p $FATDOG_STATE_DIR 2> /dev/null		# make our config directory if it doesn't exist
+[ -e $LANG_CONFIG ] && read LANG < $LANG_CONFIG 
+[ -e $TZ_CONFIG ] && read TZ < $TZ_CONFIG 
+export LANG TZ EDITOR OUTPUT_CHARSET TEXTDOMAINDIR
+
+############# generic settings ###############
+
+### path, libraries, and pkg-config - listed from most to least commonly used
+
+# standard path
+STD_PATH="/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/X11R7/bin:$HOME/bin:/usr/lib64/firefox:/usr/lib64/seamonkey"
+STD_LD_LIBRARY_PATH="/lib:/usr/lib64:/usr/X11R7/lib64:$HOME/my-applications/lib:/usr/lib64/firefox"
+STD_PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/usr/X11R7/lib64/pkgconfig"
+LIB32_LD_LIBRARY_PATH="/lib32:/usr/lib32:/usr/X11R7/lib32"
+
+# QT4 path
+QT4_PATH="/opt/qt4/bin" #if devx sfs.
+QT4_LD_LIBRARY_PATH="/opt/qt4/lib64"
+QT4_PKG_CONFIG_PATH="/opt/qt4/lib64/pkgconfig"
+QT4_CPLUS_INCLUDE_PATH="/opt/qt4/include" #devx - export
+export QT4DIR="/opt/qt4"
+
+# QT3 path
+QT3_PATH="/opt/qt3/bin" #if devx sfs.
+QT3_LD_LIBRARY_PATH="/opt/qt3/lib64"
+QT3_PKG_CONFIG_PATH="/opt/qt3/lib64/pkgconfig"
+QT3_CPLUS_INCLUDE_PATH="/opt/qt3/include" #devx - export
+export QT3DIR="/opt/qt3"
+export QTDIR="/opt/qt3"
+
+# GNOME 2 path
+GNOME2_PATH="/opt/gnome2/bin"
+GNOME2_LD_LIBRARY_PATH="/opt/gnome2/lib64"
+GNOME2_PKG_CONFIG_PATH="/opt/gnome2/lib64/pkgconfig"
+
+# SAMBA path
+SAMBA_PATH="/opt/samba/bin"
+SAMBA_LD_LIBRARY_PATH="/opt/samba/lib64"
+
+# export all of them path
+PATH=$STD_PATH:$QT4_PATH:$QT3_PATH:$GNOME2_PATH:$SAMBA_PATH
+LD_LIBRARY_PATH=$STD_LD_LIBRARY_PATH:$LIB32_LD_LIBRARY_PATH:$QT4_LD_LIBRARY_PATH:\
+$QT3_LD_LIBRARY_PATH:$GNOME2_LD_LIBRARY_PATH:$SAMBA_LD_LIBRARY_PATH
+PKG_CONFIG_PATH=$STD_PKG_CONFIG_PATH:$QT4_PKG_CONFIG_PATH:$QT3_PKG_CONFIG_PATH:$GNOME2_PKG_CONFIG_PATH
+CPLUS_INCLUDE_PATH=$QT4_CPLUS_INCLUDE_PATH:$QT3_CPLUS_INCLUDE_PATH
+export PATH LD_LIBRARY_PATH PKG_CONFIG_PATH CPLUS_INCLUDE_PATH
+
+### application settings
+
+# shell configurations
+HISTFILESIZE=1000
+HISTCONTROL=erasedups
+ENV=/etc/shinit	# for user-specific settings that can change after login (via su)
+INPUTRC=/etc/inputrc
+read HOSTNAME < /etc/hostname
+export ENV HISTFILESIZE HISTCONTROL INPUTRC HOSTNAME
+
+# mozilla and glib
+export MOZ_PLUGIN_PATH="/usr/lib64/mozilla/plugins"	# is this still used?
+export MOZ_DISABLE_PANGO=1 				# sm/firefox speed-up
+export G_FILENAME_ENCODING=@locale		# use current locale instead of utf8
+# export OOO_FORCE_DESKTOP="gnome"		# deprecated since OO 3.2
+
+#v1.0.6 - BarryK - sylpheed uses metamail which requires this...
+export MM_RUNASROOT=1
+
+# export puppy DEFAULT* stuff
+#DEFAULTBROWSER=$(awk 'END { print $2 }' /usr/local/bin/defaultbrowser)
+#DEFAULTDRAW=$(awk 'END { print $2 }' /usr/local/bin/defaultdraw)
+#DEFAULTHTMLEDITOR=$(awk 'END { print $2 }' /usr/local/bin/defaulthtmleditor)
+#DEFAULTMEDIAPLAYER=$(awk 'END { print $2 }' /usr/local/bin/defaultmediaplayer)
+#DEFAULTPAINT=$(awk 'END { print $2 }' /usr/local/bin/defaultpaint)
+#DEFAULTSPREADSHEET=$(awk 'END { print $2 }' /usr/local/bin/defaultspreadsheet)
+#DEFAULTTEXTEDITOR=$(awk 'END { print $2 }' /usr/local/bin/defaulttexteditor)
+#DEFAULTWORDPROCESSOR=$(awk 'END { print $2 }' /usr/local/bin/defaultwordprocessor)
+#export DEFAULTBROWSER DEFAULTDRAW DEFAULTHTMLEDITOR DEFAULTMEDIAPLAYER DEFAULTPAINT DEFAULTSPREADSHEET DEFAULTTEXTEDITOR DEFAULTWORDPROCESSOR
+#export BROWSER=$DEFAULTBROWSER	# xdg-open uses this variable
+
+# XDG settings (standards.freedesktop.org/basedir-spec/latest/) from rarsa since 2.0.2
+export XDG_DATA_DIRS=/usr/share:/usr/local/share
+export XDG_CONFIG_DIRS=/etc/xdg #v2.14 changed from /usr/etc
+export XDG_DATA_HOME=$HOME/.local/share
+export XDG_CONFIG_HOME=$HOME/.config
+export XDG_CACHE_HOME=$HOME/.cache
+mkdir -p $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME
+
+# ndr : alphaos ori : profile
+export PS1='[\u@\h \W]\$ '
+export XDG_MENU_PREFIX="lxde-"
+export SHELL="/usr/bin/bash"
+export EDITOR="emendo"
+export BROWSER="firefox"
+
+#if [ ! -d /var/wayland/${UID}-runtime-dir ]; then
+#  mkdir -p /var/wayland/${UID}-runtime-dir
+#  chmod 0700 /var/wayland/${UID}-runtime-dir
+#fi
+#export XDG_RUNTIME_DIR="/var/wayland/${UID}-runtime-dir"
+
+for i in LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES \
+  LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT LC_IDENTIFICATION LC_ALL; do 
+  export "$i"="$LOCALE"
+done
+
+#w468 BarryK - 'netpbm' utilities need to be told where rgb.txt is...
+[ -f /usr/share/X11/rgb.txt ] && export RGBDEF=/usr/share/X11/rgb.txt
+
+#v2.16 BarryK - this need arose when considering SFS files that may require special env. variables.
+# this code is lifted straight from Vector...
+# Append any additional sh scripts found in /etc/profile.d/:
+for profile_script in /etc/profile.d/*.sh ; do
+  if [ -x $profile_script ]; then
+    . $profile_script
+  fi
+done
+unset profile_script
+
+### default user limits and umask
+ulimit -c 0
+if [ `id -gn` = `id -un` -a `id -u` -gt 14 ]; then
+ umask 002
+else
+ umask 022
+fi
+
+# source local profile and per-user profile last, so that it can override all previous settings
+[ -r /etc/profile.local ] && . /etc/profile.local
+[ -r $FATDOG_STATE_DIR/profile ] && . $FATDOG_STATE_DIR/profile
+
+### pfix handling - understands "xorgwizard" and "nox" here
+#pfix=$(sed -n '/pfix/ {s/^.*pfix=//; s/ .*$//; p}' /proc/cmdline) # get "pfix" (no longer declared - /etc/profile is not part of init)
+#case "$pfix" in
+#	*xorgwizard*)
+#		#{ rm /etc/X11/no-xorg.conf; rm /etc/X11/xorg.conf; } 2> /dev/null
+#		if ! pidof X > /dev/null; then
+#			# run in another vt so our display is not clobbered with messages from background processes
+#			busybox openvt -sw /usr/sbin/xorgwizard 
+#			chvt 1
+#		fi
+#		;;
+#	*nox*)
+#		# dont start X
+#		return
+#		;;
+#esac
+
+# start X if it's not already running
+! pidof X > /dev/null && [ -z "$DISPLAY" ] && alphaosx # don't exec, so that we can exit to terminal later.
+#if [ $X_AUTOLOGIN == "yes" ]; then exec alphaosx; fi
+
+# end - next stop /etc/shinit 

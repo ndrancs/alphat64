@@ -1,0 +1,40 @@
+#DISTRO_FILE_PREFIX: prefix for Puppy files... exs: upup-500.sfs, upupsave.2fs
+#DISTRO_VERSION: this is the version number of Puppy that you are building. must be 3 digits.
+#       (technical note: see below it is defined without quotes, this is required by scripts)
+#package list and urls are in file DISTRO-PKGS-SPECS-${DISTRO_BINARY_COMPAT}.
+
+DISTRO_VERSION=630
+DISTRO_BINARY_COMPAT="fatdog" #####change this as required#####
+
+case $DISTRO_BINARY_COMPAT in
+ ubuntu)
+  DISTRO_NAME="Jaunty Puppy"
+  DISTRO_FILE_PREFIX="upup"
+  DISTRO_COMPAT_VERSION="jaunty"
+ ;;
+ debian)
+  DISTRO_NAME="Lenny Puppy"
+  DISTRO_FILE_PREFIX="dpup"
+  DISTRO_COMPAT_VERSION="lenny"
+ ;;
+ slackware)
+  DISTRO_NAME="Slack Puppy"
+  DISTRO_FILE_PREFIX="spup"
+  DISTRO_COMPAT_VERSION="12.2"
+ ;;
+ arch)
+  DISTRO_NAME="Arch Puppy"
+  DISTRO_FILE_PREFIX="apup"
+  DISTRO_COMPAT_VERSION="200904"
+ ;;
+ puppy) #built entirely from Puppy v4.x pet pkgs.
+  DISTRO_NAME="Puppy"
+  DISTRO_FILE_PREFIX="ppup"
+  DISTRO_COMPAT_VERSION="41x"
+ ;;
+ fatdog)
+  DISTRO_NAME="Fatdog64"
+  DISTRO_FILE_PREFIX="fd64"
+  DISTRO_COMPAT_VERSION=$DISTRO_VERSION
+ ;;
+esac

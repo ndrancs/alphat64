@@ -1,0 +1,21 @@
+#!/bin/ash
+# during start-up, services will be started in alphabetical order
+# during shutdown, services will be stopped in reverse alphabetical order
+#
+# why this file is here and not merged with rc.sysinit/rc.shutdown?
+# - needed by both 
+# - must run async in rc.sysinit, to speed-up boot process
+# - service dependency: later service won't start until earlier service is up
+#
+# $1 - start/stop
+
+case $1 in
+	start) ORDER= ;;
+	stop) ORDER=-r ;;
+esac
+
+for service_script in $(ls $ORDER /etc/init.d/*); do
+	[ -x $service_script ] && $service_script $1
+done
+unset service_script ORDER
+[ -n "$RC_SERVICES_PID" ] && rm $RC_SERVICES_PID

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Compatibility script. All actions now done in wmexit
+exec wmexit poweroff

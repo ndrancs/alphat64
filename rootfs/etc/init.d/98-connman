@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+
+description="connection service"
+
+case "$1" in
+   
+   start)
+      connmand -n &
+      ;;
+
+   stop)
+      wpa_cli terminate
+	  dhcpcd -k
+	  rfkill unblock all
+      ;;
+      
+esac

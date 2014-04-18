@@ -1,0 +1,38 @@
+#!/bin/dash
+
+start_logger() {
+	mv /var/log/messages /var/log/messages.old 2> /dev/null
+#	syslogd -m 0
+#	klogd
+	metalog &
+}
+
+stop_logger() {
+#	killall klogd
+#	killall syslogd
+	killall metalog
+}
+
+is_up_logger() {
+    [ -e /run/metalog.pid ]
+}
+
+case $1 in
+	start)
+		start_logger
+		;;
+		
+	stop)
+		stop_logger
+		;;
+		
+	restart)
+		stop_logger
+		sleep 1
+		start_logger
+		;;
+		
+	status)
+		is_up_logger && echo "syslogger is running." || echo "syslogger is stopped."
+		;;
+esac

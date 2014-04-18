@@ -1,0 +1,9 @@
+#!/bin/dash
+# preload fonts and common icons to speed up boot time
+# must be run before 50-wpagui because 50-wpagui takes a long time to finish
+case $1 in 
+start)
+echo preloading fonts and icons ...
+find /root/.fonts/ /root/Fonts/ /usr/share/icons/hicolor -type f -print0 | xargs -0 readahead &
+;;
+esac

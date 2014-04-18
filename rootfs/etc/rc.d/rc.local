@@ -1,0 +1,40 @@
+#this file called from rc.sysinit
+#you can edit this file
+#When firewall is installed, will append lines to this file...
+
+####
+# CPU frequency scaling
+# Fatdog runs with "ondemand" scaling governor by default.
+# If you need utmost performance, change it to "performance" by uncommenting
+# the lines below. CONSERVATIVE
+####
+modprobe cpufreq_conservative
+ONLINECPUS=$(cat /sys/devices/system/cpu/online | sed "s/-/ /")
+CPUPATH=/sys/devices/system/cpu/cpu
+for cpu in $(seq $ONLINECPUS); do
+    CPUFREQ=${CPUPATH}${cpu}/cpufreq
+    if [ -d $CPUFREQ ]; then
+        echo "conservative" > $CPUFREQ/scaling_governor
+    fi
+done
+####
+
+####
+# Laptop harddisk load/unload cycle count
+# If your laptop harddisk runs an unusually high load/unload cycle count
+# (you can see this by running "smartctl -A /dev/sda"), you need to change
+# the power management mode of your harddisk by uncommenting the line below.
+# Usually 254 works but every harddisk is unique and you will have to test 
+# for yourself. Change "/dev/sda" with the name of your harddisk.
+# This command can be repeated as many as needed, one for each harddisk.
+####
+#hdparm -B 254 /dev/sda
+####
+
+####
+# Radeon DPM power management control
+# By default we set it to low power/low performance to maximise battery life
+# and cooler temperature. If you use desktop, comment out this line or change
+# "low" to "high" as needed. Alternatively install fglrx / Catalyst driver.
+####
+#radeon-dpm-control.sh low

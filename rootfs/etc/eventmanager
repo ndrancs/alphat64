@@ -1,0 +1,61 @@
+#######
+# Configuration file for 'events' in Fatdog
+# This file is read/written by /usr/sbin/fatdog-event-manager.sh
+# Note: Some of these settings should have per-user setting override ...
+#######
+
+###
+# This parameter is read by /sbin/fatdog-udevd-helper.sh
+# Periodic save of RAM layer to savefile, in minutes. 0=no periodic save...
+RAMSAVEINTERVAL=30
+
+###
+# The following parameters, together, controls non-root access level to 
+# partitions mounted by /usr/sbin/fatdog-drive-icon-mount-helper.sh
+#
+# These two sets the permission mode:
+# Set it to 770/007 for read-write, 750/027 for read-only
+# Both must be set in order for it to work properly
+ACCESS_MODE=770
+UMASK_MODE=007
+
+# This sets the "group" used for the permission, if blank then $USER is used.
+# By default only the user who mounted the drive can access the drive
+# setting this to 'users' or any other group enables members of that group
+# to access the drives too.
+ACCESS_GROUP=
+
+# This one modifies the permission bits of for "other" (o) unix permission.
+# (=called as "unlisted" users because they are not member of the standard
+# "users" group). If it is turned on, it will grant read/execute access 
+# anyone who can access the system.
+# It works by changing last digit of ACCESS_MODE to 5 (instead of 0)
+# and last digit of UMASK_MODE to 2 (instead of 7).
+# Not recommended to turn this on, but some Linux OS (e.g. Ubuntu) may need it
+OTHER_ACCESS=
+
+###
+# The following parameters are read by /usr/sbin/fatdog-drive-icon-udev-helper.sh
+# where to draw the icons (top, bottom, left right)
+ICON_ALIGNMENT=bottom	
+
+# whether drive icons display volume label, leave blank to disable 
+# (in case blkid is too slow)
+SHOW_VOLUME_LABEL=yes
+
+# all these are in pixels; ICON_DX/DY are assumed horizontal/vertial icon size
+MARGIN_TOP=32 
+MARGIN_BOTTOM=65
+MARGIN_LEFT=32 
+MARGIN_RIGHT=64
+ICON_DX=48
+ICON_DY=52
+GRID_X=64
+GRID_Y=64
+
+###
+# How many seconds to wait before starting /usr/sbin/delayedrun
+STARTUP_DELAY=3
+
+# whether delayedrun will show drive icons at all
+USE_DRIVE_ICON=yes

@@ -1,0 +1,4 @@
+file /etc/ppp/options-mobile
+user "smartfren"
+password "smartfren"
+connect "/usr/sbin/chat -v -t15 -f /etc/ppp/chatscripts/fren.chat"

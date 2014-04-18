@@ -1,0 +1,37 @@
+#!/bin/dash
+# samba server
+
+start_samba() {
+	smbd
+	nmbd
+}
+
+stop_samba() {
+	while pidof smbd > /dev/null; do killall smbd 2>/dev/null; done
+	while pidof nmbd > /dev/null; do killall nmbd 2>/dev/null; done
+}
+
+is_up_samba() {
+	pidof smbd > /dev/null
+}
+
+case "$1" in
+	start)
+		start_samba
+		;;
+
+	stop)
+		stop_samba
+		;;
+	
+	restart)
+		stop_samba
+		sleep 1
+		start_samba
+		;;
+		
+	status)
+		is_up_samba && echo "samba is running." || echo "samba is stopped."
+		;;		
+
+esac

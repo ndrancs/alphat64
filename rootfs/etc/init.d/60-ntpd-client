@@ -1,0 +1,37 @@
+#!/bin/dash
+# Start ntpd to sync time from the Internet at boot
+# $1 - start, stop, restart, status
+UP_FLAG=/tmp/60-ntpd-client
+HWCLOCKPARM="--localtime" # default
+HWCLOCKCONF=/etc/hwclock.conf
+[ -e $HWCLOCKCONF ] && . $HWCLOCKCONF
+
+start() {
+	if [ "$RC_NETWORK_PID" ]; then 						# boot time start-up
+		while [ -e $RC_NETWORK_PID ]; do sleep 1; done 	# wait until rc.network is done
+	fi
+	ntpd -n -q -p pool.ntp.org
+	hwclock --systohc $HWCLOCKPARM
+	rm -f $UP_FLAG
+}
+
+case $1 in
+	start|restart) 
+		if ! [ -e $UP_FLAG ]; then
+			start & 
+			echo $! > $UP_FLAG
+		fi
+		;;
+		
+	stop) 
+		if [ -e $UP_FLAG ]; then
+			kill $(cat $UP_FLAG)
+			rm -f $UP_FLAG
+		fi
+		;;
+	
+	status) 
+		[ -e $UP_FLAG ] && echo "ntpd is running." || echo "ntpd is stopped." 
+		;;
+		
+esac

@@ -1,0 +1,34 @@
+#!/usr/bin/bash
+
+#xrandr --output VGA1 --mode 1366x768 --rate 59.79
+#/etc/rc.d/hwclock start &
+
+wpset-shell --init &
+
+### more option for setxkbmap:/usr/share/X11/xkb/rules/base.lst
+setxkbmap -layout us,ar -option -option terminate:ctrl_alt_bksp -option grp:switch,grp:alt_shift_toggle,grp_led:scroll &
+
+mpg123 -q /usr/share/audio/login.mp3 &
+volumeicon &
+
+sleep 1
+tint2 &
+
+sleep 1
+numlockx off &
+xset b off &
+
+sleep 1
+conky &
+
+sleep 2
+connman-ui-gtk &
+
+sleep 1s
+parcellite &
+
+sleep 15
+#rdate -s tick.greyware.com
+#compton -i 0.7 -e 0.8 -m 0.8 -b &
+#wbar &
+exit

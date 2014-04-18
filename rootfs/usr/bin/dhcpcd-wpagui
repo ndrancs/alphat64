@@ -1,0 +1,12 @@
+#!/bin/sh
+#Called by wpa_cli daemon. Wpa_cli is executed like this 'wpa_cli -a dhcpcd-wpagui'.
+#Wpa_cli calls dhcpcd-wpagui with: $1 is the interface (eth0, ath0, etc), and $2 is the event - either "CONNECTED" or "DISCONNECTED". 
+
+TIMEOUT=120	# in seconds
+
+if [ "$2" = "CONNECTED" ] ; then 
+dhcpcd -t $TIMEOUT -L -h $(hostname) $1		# timeout, no ipv4ll, pass hostname to dhcp server
+cat /var/run/dhcpcd-$1.pid > /tmp/dhcpcd-wpagui.pid
+fi
+[ "$2" = "DISCONNECTED" ] && kill -9 $(cat /tmp/dhcpcd-wpagui.pid) 
+

@@ -1,0 +1,22 @@
+name="retrovol"
+version="0.12"
+revision="1"
+category="multimedia"
+description="An sound volume mixer"
+source="http://www.browserloadofcoolness.com/software/puppy/PETget/$name-$version.tar.gz"
+homepage="http://puppylinux.svn.sourceforge.net/viewvc/puppylinux/retrovol/"
+maintainer="simargl <archpup@gmail.com>"
+depends="alsa-lib"
+makedepends=""
+
+compile() {
+  cd $name-$version
+  ./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc
+  make
+}
+
+package() {
+  make DESTDIR=$destdir install
+}

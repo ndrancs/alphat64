@@ -1,0 +1,34 @@
+--- src/sakura.c	2012-04-30 17:09:01.000000000 +0200
++++ src/sakura.c.new	2013-02-05 14:40:26.970008753 +0100
+@@ -776,31 +776,6 @@
+ 
+ 	if (!sakura.less_questions) {
+ 		npages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(sakura.notebook));
+-
+-		/* Check for each tab if there are running processes. Use tcgetpgrp to compare to the shell PGID */
+-		for (i=0; i < npages; i++) {
+-
+-			term = sakura_get_page_term(sakura, i);
+-			pgid = tcgetpgrp(vte_terminal_get_pty(VTE_TERMINAL(term->vte)));
+-
+-			/* If running processes are found, we ask one time and exit */
+-			if ( (pgid != -1) && (pgid != term->pid)) {
+-				dialog=gtk_message_dialog_new(GTK_WINDOW(sakura.main_window), GTK_DIALOG_MODAL,
+-											  GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
+-											  _("There are running processes.\n\nDo you really want to close Sakura?"));
+-
+-				response=gtk_dialog_run(GTK_DIALOG(dialog));
+-				gtk_widget_destroy(dialog);
+-
+-				if (response==GTK_RESPONSE_YES) {
+-					sakura_config_done();
+-					return FALSE;
+-				} else {
+-					return TRUE;
+-				}
+-			} 
+-		
+-		}
+ 	}
+ 
+ 	sakura_config_done();

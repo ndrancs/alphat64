@@ -1,0 +1,41 @@
+#!/bin/dash
+# mongoose web server
+SERVER_BIN=mongoose
+
+start_server() {
+	if [ $(id -u) -eq 0 ]; then
+		setsid $SERVER_BIN /etc/mongoose.conf &
+	else
+		[ ! -e $HOME/public_html ] && mkdir $HOME/public_html
+		setsid $SERVER_BIN -r $HOME/public_html &
+	fi
+}
+
+stop_server() {
+	while pidof $SERVER_BIN > /dev/null; do killall $SERVER_BIN 2>/dev/null; done
+}
+
+is_up_server() {
+	pidof $SERVER_BIN > /dev/null
+}
+
+case "$1" in
+	start)
+		start_server
+		;;
+
+	stop)
+		stop_server
+		;;
+	
+	restart)
+		stop_server
+		sleep 1
+		start_server
+		;;
+		
+	status)
+		is_up_server && echo "mongoose is running." || echo "mongoose is stopped."
+		;;		
+		
+esac

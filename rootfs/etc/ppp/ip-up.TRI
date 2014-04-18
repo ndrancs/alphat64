@@ -1,0 +1,54 @@
+#!/bin/bash -x
+#
+# This script is run by pppd when there's a successful ppp connection.
+#
+
+# Execute all scripts in /etc/ppp/ip-up.d/
+#for ipup in /etc/ppp/ip-up.d/*.sh; do
+#  if [ -x $ipup ]; then
+#    # Parameters: interface-name tty-device speed local-IP-address remote-IP-address ipparam
+#    $ipup "$@"
+#  fi
+#done
+
+SCRIPTNAME=$0
+INTERFACE=$1
+DEVICE=$2
+SPEED=$3
+LOCALIP=$4
+REMOTEIP=$5
+OUTPUTDEV=/dev/pts/0
+
+echo > $OUTPUTDEV
+echo "$SCRIPTNAME --> Interface    : $INTERFACE" > $OUTPUTDEV
+echo "$SCRIPTNAME --> Device       : $DEVICE" > $OUTPUTDEV
+echo "$SCRIPTNAME --> IP Local     : $LOCALIP" > $OUTPUTDEV
+echo "$SCRIPTNAME --> IP Remote    : $REMOTEIP" > $OUTPUTDEV
+echo > $OUTPUTDEV
+
+if [ "$INTERFACE" = "ppp0" ]; then
+
+    case "$LOCALIP" in
+
+        # Routing Tere
+        10.22.*|10.23.*|10.25.*)
+        #10.16.*|10.21.*|10.22.*|10.23.*|10.24.*|10.25.*|10.26.*|10.27.*|10.28.*|10.29.*|10.20.*|10.30.*)
+        ### Menghapus route 10.64.64.64 / REMOTE IP
+        #/sbin/route del -host $REMOTEIP dev $INTERFACE
+        /bin/chmod 755 /etc/resolv.conf
+        echo "nameserver 10.0.18.54" >> /etc/resolv.conf
+        /bin/chmod 644 /etc/resolv.conf
+        ;;
+        # Other IPs
+        *)
+        poff
+        pon
+        ;;
+        
+    esac    
+fi
+
+echo "$SCRIPTNAME --> Routing Table :" > $OUTPUTDEV
+/sbin/route -n > $OUTPUTDEV
+
+exit 0

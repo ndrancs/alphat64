@@ -1,0 +1,76 @@
+#!/bin/dash
+#
+# messagebus:   The D-BUS systemwide message bus
+#
+# description:  This is a daemon which broadcasts notifications of system events \
+#               and other messages. See http://www.freedesktop.org/software/dbus/
+#
+# processname: dbus-daemon
+# pidfile: /var/run/dbus/pid
+
+# This is a modified version of the rc.messagebus script distributed with the
+# dbus sources.  Thanks to Don Tanner of the GWare <http://gware.org> Project
+# for most of the work involved      --Robby Workman <http://rlworkman.net>
+
+
+PIDFILE="/run/dbus/pid"
+socket="/run/dbus/system_bus_socket"
+
+start_messagebus() {
+  if ! ps axc | grep -w dbus-daemon ; then
+    rm -f $(dirname $PIDFILE)/*
+    if [ -x /usr/bin/dbus-uuidgen -a -x /usr/bin/dbus-daemon ] ; then
+      echo "Starting system message bus:  /usr/bin/dbus-uuidgen --ensure ; /usr/bin/dbus-daemon --system"
+      /usr/bin/dbus-uuidgen --ensure
+      /usr/bin/dbus-daemon --system 1> /dev/null
+    fi
+  fi
+}
+
+stop_messagebus() {
+  if [ -e "$PIDFILE" ]; then
+    echo "Stopping system message bus..."
+    kill $(cat $PIDFILE) 1> /dev/null 2> /dev/null
+    # Just in case:
+    killall dbus-daemon 1> /dev/null 2> /dev/null
+    rm -f $socket $PIDFILE
+  fi
+}
+
+reload_messagebus() {
+  echo "Reloading system message bus configuration..."
+  if [ -e "$PIDFILE" ]; then
+    kill -HUP $(cat $PIDFILE)
+  else
+    killall -HUP dbus-daemon
+  fi
+}
+
+is_up_messagebus() {
+	test -e "$PIDFILE"
+}
+
+# See how we were called.
+case "$1" in
+  start)
+    start_messagebus
+    ;;
+  stop)
+    stop_messagebus
+    ;;
+  restart)
+    stop_messagebus
+    sleep 1
+    start_messagebus
+    ;;
+  reload)
+    reload_messagebus
+    ;;
+  status)
+    is_up_messagebus && echo "messagebus is running." || echo "messagebus is stopped."
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|restart|reload|status}"
+    ;;
+esac
+

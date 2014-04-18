@@ -1,0 +1,20 @@
+name="btrfs-progs"
+version="3.12"
+revision="1"
+category="development"
+description="btrfs filesystem utilities"
+source="https://www.kernel.org/pub/linux/kernel/people/mason/btrfs-progs/v$version/$name-v$version.tar.xz"
+homepage="http://www.kernel.org"
+maintainer="ndrancs <ndrancs@gmail.com>"
+depends="util-linux"
+makedepends=""
+
+compile() {
+  cd $name-v$version
+  sed -i 's|prefix ?= /usr/local|prefix ?= /usr|g' Makefile
+  make
+}
+
+package() {
+  make DESTDIR=$destdir install
+}

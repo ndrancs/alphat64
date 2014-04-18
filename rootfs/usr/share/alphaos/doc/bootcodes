@@ -1,0 +1,108 @@
+  Kernel boot parameters are text strings which are interpreted by the system 
+  to change specific behaviors and enable or disable certain features. 
+  
+  Kernel parameters can be set either temporarily by editing the boot menu when 
+  it shows up, or by modifying the boot loader's configuration file, menu.lst.
+  
+  Kernel boot parameters:
+  
+    - are case-sensitive,
+
+    - are sometimes just a simple word ("dofsck")
+
+    - sometimes have an = sign with various possible values (base2ram=yes)
+
+    - sometimes include punctuation ("i8042.noloop") 
+  
+  > List of official Linux Live bootcodes:
+
+===========================================================================
+  
+basesfs=location, or basesfs=none, or basesfs=ask
+
+location options
+initrd:path             use basesfs contained inside initrd
+local:path:crypt        search for basesfs in all local devices
+usb:path:crypt          search for basesfs in all usb devices
+device:dev:path:crypt   use basesfs/basedir in specified device
+label:label:path:crypt  use basesfs/basedir in device with specified label
+uuid:uuid:path:crypt    use basesfs/basedir in device with specified uuid
+cifs:user:pass:unc:path use basesfs/basedir in specified cifs share
+nbd:host:port:crypt     use specified nbd device as basesfs device
+
+Note
+crypt is optional, path is optional except for local and usb.
+path is path to the basesfs or base directory. For cifs, user=+ means ask for user/password.
+crypt means that the device/partition is encrypted. Not the basesfs file.
+Use crypt for cryptoloop, dmcrypt for dm-crypt (LUKS).
+
+===========================================================================
+
+savefile=layer:location, or savefile=none, or savefile=ask
+
+layer options
+ram                     use RAM layer with periodic saving to actual savefile
+direct                  use savefile directly 
+
+location options
+local:path:crypt        search for savefile in all local devices
+usb:path:crypt          search for savefile in all usb devices
+device:dev:path:crypt   use savefile/savedir in specified device
+label:label:path:crypt  use savefile/savedir in device with specified label
+uuid:uuid:path:crypt    use savefile/savedir in device with specified uuid
+cifs:user:pass:unc:path use savefile/savedir in specified cifs share
+nbd:host:port:crypt     use specified nbd device as save device
+multi:dev:path:n        multisession with device, don't load last n sessions
+
+Note
+crypt is optional, path is optional except for local and usb.
+path is path to the savefile or save directory. For cifs, user=+ means ask for user/password.
+crypt means that the device/partition is encrypted. Not the savefile file.
+Savefile file is also encrypted if its filename has the word _crypt_ in it.
+Use crypt and _crypt_ for cryptoloop, dmcrypt and _dmcrypt_ for dm-crypt (LUKS).
+
+===========================================================================
+
+net=type:device-settings:ip-address or net=ask
+
+type options
+wired                   use wired device
+wpa or wpa2             use wireless device with wpa or wpa2 security
+
+device-settings for wired
+device                  network device name e.g eth0, eth1
+
+device-settings for wpa/wpa2: ssid:password:device
+ssid                    wireless SSID
+password                wireless password for WPA/WPA2
+device                  wireless device e.g wlan0
+
+IP address options: dhcp or ip:ip-address:netmask:gateway:dns
+dhcp                    the string "dhcp", system will get IP address from dhcp
+ip                      the string "ip", system will set static IP as follows
+ip-address              IP address (e.g. 192.168.1.50)
+netmask                 network mask (e.g. 255.255.255.0)
+gateway                 optional IP address of network gateway (e.g. 192.168.1.1)
+dns                     optional IP address of dns server (e.g. 8.8.8.8)
+
+===========================================================================
+
+base2ram=yes            If you use external basesfs, use this to load basesfs into RAM
+search[=n]              Search all savefiles in directories up to n-th level (default 1)
+waitdev=n               Wait n seconds for devices to settle and be detected
+dofsck                  Check (and fix) filesystems before mounting - only for ext2/3/4
+withlvm                 Activate LVM partition on boot
+withmdadm               Activate mdadm Linux software RAID partition on boot
+acpi=off                Default on for PCs >2001, may give boot/shutdown probs.
+pci=noacpi              May solve boot boot problems on some hardware.
+pci=nocrs               Discard pci ACPI information. Fixes boot failures.(t3500)
+loglevel=<n>            Bootup verbosity. 7 is high verbosity for debugging.
+blacklist               List of modules to blacklisted, comma separated
+loadmodules             List of modules to be loaded, comma separated
+pfix=nox                Commandline only, do not start X.
+pfix=xorgwizard         Start xorgwizard before launching desktop.
+
+===========================================================================
+
+
+

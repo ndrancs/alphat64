@@ -1,0 +1,263 @@
+#!/bin/ash
+# puppy-compatible rc.sysinit - re-written from scratch
+# (C) James Budiono, 2012, 2013 except where noted
+# License: GNU GPL Version 3 or later
+#
+# not supported: full-install
+# boot time parameters handled: pkeys
+
+### configuration
+PRELOADED_MODULES=/etc/modules
+export RC_NETWORK_PID=/tmp/rc.network.pid	# record pid in case we need to wait
+export RC_SERVICES_PID=/tmp/rc.services.pid	# record pid in case we need to wait
+export BOOTSTATE_PATH=/etc/BOOTSTATE
+. $BOOTSTATE_PATH							# load initramfs-time configuration
+UDEV="/usr/lib/systemd/systemd-udevd"
+
+############ minimum necessary setup #################
+# set system clock
+HWCLOCKPARM="--localtime" # default
+HWCLOCKCONF=/etc/hwclock.conf
+[ -e $HWCLOCKCONF ] && . $HWCLOCKCONF
+hwclock --hctosys $HWCLOCKPARM
+
+# mount devpts, /tmp and /dev/shm and swap (if any)
+[ ! -L /etc/mtab ] && { rm -rf /etc/mtab; ln -s /proc/mounts /etc/mtab; }
+busybox mount -a 	# as configured in /etc/fstab
+busybox swapon -a	# as configured in /etc/fstab
+
+# Check for clean shutdown
+if [ -e /etc/booted ] ; then
+	echo "Running auchk..."
+	auchk -w $SAVEFILE_MOUNT
+else 
+	touch /etc/booted
+fi
+
+# setup /mnt/home - the partition where savefile is
+# this is puppy-compatibility stuff but may be needed by load_sfs.sh too
+rm -f /mnt/home
+[ "$SAVE_DEV_MOUNT" ] && ln -sfT $SAVE_DEV_MOUNT /mnt/home
+[ "$MULTI_MOUNT" ] && ln -sfT $MULTI_MOUNT /mnt/home
+
+# load extra sfs
+/sbin/load_sfs.sh start
+
+# pre-load modules, if any
+for p in $(sed 's/#.*//' $PRELOADED_MODULES); do echo Loading module $p; modprobe $p; done
+
+# pre-load radeon: workaround for kernel 3.7/3.8 module load race conditions
+lsmod | grep -q radeon || find /sys/devices/pci* -name uevent | xargs cat 2>/dev/null | 
+grep -q ^MODALIAS=pci:v00001002d0000 && echo Activating radeon workaround && modprobe -b radeon
+
+# ndr : ldconfig : ori alphaos
+if [ ! -f /etc/ld.so.cache ];then
+    echo "Updating shared library links..."
+    ldconfig
+fi
+
+# start udev
+#echo > /proc/sys/kernel/hotplug		# disable hotplug leftover from init
+#/sbin/udevd --daemon
+#/sbin/udevadm trigger --action=add  # refresh udev database 
+
+# ndr : Systemd udev : ori alphaos
+echo "Starting Systemd udev daemon.."
+$UDEV --daemon
+udevadm trigger
+KERNVER="`uname -r`"
+if [ ! -f /usr/lib/modules/${KERNVER}/modules.dep ];then
+  depmod
+fi
+modprobe fbcon
+
+#echo "Activating swap..."
+#swapon -a 2> /dev/null
+
+############### additional stuff ######################
+
+# nls modules for accessing filesystems
+modprobe nls_iso8859-1	# default western european codepage
+modprobe nls_cp437		# us and canada codepage
+modprobe nls_utf8		# joliet cd-roms
+
+# load apm if acpi isn't available
+[ ! -d /proc/acpi ] && modprobe apm #v406
+
+# ndr : udev uevents : ori alphaos
+echo "Triggering udev uevents..."
+udevadm settle --timeout=5
+echo "/usr/lib/systemd/systemd-udevd" > /proc/sys/kernel/hotplug
+
+#v408 kirk: Check for laptop battery...
+modprobe battery
+if [ -d /proc/acpi/battery ]; then
+	results="`find /proc/acpi/battery -mindepth 1 -type d`"
+	if [ ! -z "$results" ]; then # it's a laptop, load other modules
+		modprobe ac
+		modprobe thermal
+		modprobe fan
+	else
+		rmmod battery
+	fi
+fi
+
+############## start network and services ##############
+
+### start network
+# set hostname - use unique hostname when no savefile is used
+[ -z "$SAVEFILE_MOUNT" ] && echo alphat64-$(dmidecode -s system-uuid | md5sum | cut -c -3) > /etc/hostname 
+sed -i'' -e "1 {s/^.*$/127.0.0.1 localhost $(cat /etc/hostname)/}" /etc/hosts 
+hostname -F /etc/hostname
+
+echo 1 > /proc/sys/net/ipv4/ip_dynaddr # for dial-up modem
+mknod /dev/ppp c 108 0
+/etc/rc.d/rc.network &
+echo $! > $RC_NETWORK_PID
+
+### start services
+/etc/rc.d/rc.services start &
+echo $! > $RC_SERVICES_PID
+
+
+################# puppy compatibility stuff ################
+. /etc/DISTRO_SPECS		# puppy-compatible description
+
+# system id
+echo -e "${DISTRO_NAME} Linux\n`uname -s` `uname -r` [`uname -m` arch]\n\n" > /etc/issue
+
+# device links - cdrom & dvd
+rm -f /dev/cdrom /dev/dvd /etc/cdburnerdevice
+while read cdrom canwrite isdvd; do
+	ln -s /dev/$cdrom /dev/cdrom
+	[ $canwrite = yes -a ! -f /etc/cdburnerdevice ] && echo $cdrom > /etc/cdburnerdevice	
+	[ $isdvd = yes ] && { hdparm -d 1 /dev/$cdrom; ln -s /dev/$cdrom /dev/dvd; } > /dev/null
+done << EOF
+$(sed 's/\t\t*/|/g' /proc/sys/dev/cdrom/info | awk -F"|" '
+/drive name/ { numdrives=NF-1; for (i=2; i<=NF; i++) drives[i-2]=$i; }
+/Can write/ { for (i=2; i<=NF; i++) { capability["can_write" (i-2)]="no"; if ($i == "1") capability["can_write" (i-2)]="yes"; } }
+/read DVD/ { for (i=2; i<=NF; i++) { capability["is_dvd" (i-2)]="no"; if ($i == "1") capability["is_dvd" (i-2)]="yes"; } }
+END { for (i=0; i<numdrives; i++) print drives[i], capability["can_write" i], capability["is_dvd" i]; }
+' | sort )
+EOF
+
+# device links - mouse
+[ ! -f /etc/mousedevice ] && echo "input/mice" > /etc/mousedevice
+[ "$(cat /etc/mousedevice)" = "psaux" ] && echo "input/mice" > /etc/mousedevice
+ln -sfT /dev/$(cat /etc/mousedevice) /dev/mouse
+
+# mouse drivers - moved here from xwin
+grep -q 'ttyS' /etc/mousedevice && modprobe sermouse
+grep -q 'input/mice' /etc/mousedevice && modprobe usbhid
+
+# load keymaps and console fonts - rc.country no longer used
+# modified from original keymap loading code (c) Barry K
+[ -z "$pkeys" ] && [ -e /etc/keymap ] && read pkeys < /etc/keymap 
+if [ "$pkeys" ]; then
+	pkeys=$(ls /lib/keymaps/${pkeys}* | sed -ne '1 {s|^.*/||; p}')
+	if [ "$pkeys" ]; then
+		echo ${pkeys%%.*} > /etc/keymap
+		zcat /lib/keymaps/$pkeys | loadkmap 
+		case $pkeys in 
+			de*|be*|br*|dk*|es*|fi*|fr*|it*|no*|se*|pt*)
+				modprobe nls_cp850
+				zcat /lib/consolefonts/lat1-12.psfu.gz | loadfont
+				echo lat1-12.psfu > /etc/fontmap
+				echo 850 > /etc/codepage
+				;;
+			cz*|hu*|pl*|ro*|sk*|croat*|slovene*)
+				modprobe nls_cp852
+				modprobe nls_iso8859-2
+				zcat /lib/consolefonts/lat2-12.psfu.gz | loadfont
+				echo lat2-12.psfu > /etc/fontmap
+				echo 852 > /etc/codepage
+				;;
+			*)	# default - empty fontmap, iso-8859-1 codepage
+				rm -f /etc/fontmap
+				echo ISO-8859-1 > /etc/codepage
+				;;
+		esac
+	fi
+fi
+
+### other little things
+[ -f /etc/resolutionfix ] && eval $(cat /etc/resolutionfix)
+dmesg > /tmp/bootkernel.log
+
+### dump compatibility stuff to /etc/rc.d/PUPSTATE
+{
+	echo "#  This file exists for compatibility with Puppy apps and scripts."
+	echo "#  Some entries (like PUPMODE) are fixed and will never change."
+	echo "#  Fatdog-only applications don't use this file."
+	
+	#PUPMODE original bitmask
+	#bit 0 = 1 tmpfs
+	#bit 1 = 2 full install
+	#bit 2 = 4 have base sfs
+	#bit 4 = 8 have savefile
+	#bit 6 = 64 multisession
+	#common values= 2 (full install), 3 (full install on flash), 5 (first boot),
+	# 12 (frugal), 13 (frugal on flash), 6 (full install), 7 (full install on flash), 77 (multisession)
+	#
+	# fake it - 12 or 13 (frugal install)
+	echo PUPMODE=12
+	# used during boot-up, we don't use these
+	#PDEV1= boot device (where the base.sfs is located) - but we use savefile instead
+	#because savefile device is more likely to exist than basesfs device
+	echo PDEV1=$SAVEFILE_DEVICE
+	#DEV1FS= filesystem of PDEV1
+	[ "$SAVEFILE_DEVICE" ] && echo DEV1FS=$(guess_fstype $SAVEFILE_DEVICE)
+	#PUPSFS='sda1,ext3,/fd64/fd64-521.sfs' - location of base.sfs 
+	echo PUPSFS=
+	#PUPSAVE='sda1,ext3,/fd64/fd64save-james.3fs' - location of savefile
+	echo PUPSAVE=
+	#PMEDIA='' hints for media types use
+	echo PMEDIA=
+	#pfix='noram' - all pfix parameters - used by /etc/profile
+	echo pfix=$pfix
+	#ATADRIVES= (list of sdx drives), SATADRIVES= (list of hdx drives)
+	# - needed by probedisk2 to determine icon types
+	echo ATADRIVES=\'$(ls /sys/block | sed '/^sd/ !d')\'
+
+	# probably used by other scripts
+	#SAVE_LAYER='/pup_rw' - where the savefile is mounted
+	echo SAVE_LAYER=$SAVEFILE_MOUNT
+	#PUP_LAYER='/pup_ro2' - where base.sfs is mounted
+	echo PUP_LAYER=$BASE_SFS_MOUNT
+	#PUP_HOME= where fd64save file is (/mnt/home link) without the /initrd part
+	echo PUP_HOME=$(readlink /mnt/home) # not 100% compatible but what the heck
+	
+	# management of additional kernel modules sfs - we don't use this
+	#ZDRV='' - name of addional kernel module sfs
+	echo ZDRV=
+	#ZDRVINIT='no' - we don't use it, leave it as no
+	echo ZDRVINIT=no
+	#PSAVEMARK='' - for ZDRV management, not used
+	echo PSAVEMARK=
+	#FASTPARTS='sda1|ext3 sda2|ext4 sda3|ntfs sda4|vfat ' - don't know what this is
+	echo FASTPARTS=
+} > /etc/rc.d/PUPSTATE
+
+### execute local boot script (rc.local) last so that it can override anything set previously
+[ ! -f /etc/rc.d/rc.local.shutdown ] && cat > /etc/rc.d/rc.local.shutdown <<EOF
+# this file called from rc.shutdown
+# you can edit this file to perform custom shutdown activities
+EOF
+[ ! -f /etc/rc.d/rc.local ] && cat > /etc/rc.d/rc.local <<EOF
+# this file called from rc.sysinit
+# you can edit this file to perform custom startup activities
+# When firewall is installed, will append lines to this file.
+EOF
+. /etc/rc.d/rc.local
+
+echo "General system settings..."
+#if [ ! -d /mnt/home ]; then ln -s /mnt/live/memory/data /mnt/home; fi
+(if [ ! -f /usr/share/mime/globs ]; then update-mime-database /usr/share/mime; fi) &
+(if [ ! -f /usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache ]; then gdk-pixbuf-query-loaders --update-cache; fi) &
+(if [ ! -f /usr/share/icons/hicolor/icon-theme.cache ]; then gtk-update-icon-cache /usr/share/icons/hicolor; fi) &
+(if [ ! -f /usr/share/applications/mimeinfo.cache ]; then update-desktop-database; fi) &
+(if [ ! -f /usr/share/glib-2.0/schemas/gschemas.compiled ]; then glib-compile-schemas /usr/share/glib-2.0/schemas; fi) &
+(if [ ! -f /usr/share/fonts/TTF/fonts.scale ]; then fc-cache -f -s > /dev/null; mkfontscale /usr/share/fonts/TTF; mkfontdir /usr/share/fonts/TTF; fi) &
+sleep 0.5
+
+### next: login shell (which will execute /etc/profile)

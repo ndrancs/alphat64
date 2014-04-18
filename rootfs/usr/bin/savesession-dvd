@@ -1,0 +1,47 @@
+#!/bin/ash
+# save current session if fatdog is running in multisession mode
+# Copyright (C) James Budiono 2012
+# License: GNU GPL Version 3 or later
+#
+# Version 1.0 - initial release
+#
+# called from desktop
+# Note1: originally taken from rc.shutdown save multisession code
+# Note2: used for all multisession devices, not only DVD!
+
+### configuration
+APPTITLE="Save to Multisession device"
+MULTI_SAVE_DIR=/tmp/save-multi	# tmp dir for creating multisession savefiles
+. $BOOTSTATE_PATH				# boot-time configuration
+. /usr/sbin/fatdog-save-multisession.sh # shared multisession-saving code
+
+#################### main ###################
+[ $(id -u) -ne 0 ] && exec gtksu "$APPTITLE" "$0" # must run as root
+
+if [ "$MULTI_MOUNT" ]; then
+	if [ -d $MULTI_SAVE_DIR ]; then
+		Xdialog --title "Error!" --infobox "Another session saving is in progress, try again after it is finished." 0 0 10000
+		exit
+	fi
+	if Xdialog --title "Save multisession" --yesno "About to save the current session. 
+	Please remember to insert your disc back to $MULTI_DEVICE, and make sure that it is not full. 
+	If it is full, you need to burn a new copy of Fatdog64 to a new disc now.
+
+	Press YES to continue, or NO to cancel." 0 0; then
+
+		Xdialog --title "Working" --no-buttons --infobox "Saving session to $MULTI_DEVICE, please wait ..." 0 0 1000000 &
+		XPID=$!
+		
+		# wait for snapmergeppy to finish if there is one in progress
+		echo "Waiting for RAM save task to finish..."
+		while pidof snapmergepuppy > /dev/null; do sleep 1; done
+		while pidof fatdog-merge-layers.sh > /dev/null; do sleep 1; done
+
+		# save the session
+		save_multisession not-shutdown
+		kill $XPID
+	else
+		Xdialog --title "Error!" --infobox "Fatdog is not configured in multisession mode. This function cannot be used." 0 0 10000
+	fi
+fi
+

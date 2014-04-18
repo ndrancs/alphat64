@@ -1,0 +1,59 @@
+#!/bin/dash
+
+case "$1" in
+ start)
+   modprobe snd-pcm-oss
+   modprobe snd-mixer-oss
+   if [ ! -f /etc/asound.state ];then
+	amixer -s -q <<EOF
+set Master 90% unmute
+set Master -12dB
+set Speaker 100% unmute
+set Speaker 0dB
+set 'Master Mono' 90% unmute
+set 'Master Mono' -12dB
+set Front 90% unmute
+set Front 0dB
+set PCM 90% unmute
+set PCM 0dB
+set Synth 100% unmute
+set Synth 0dB
+set CD 100% unmute
+set CD 0dB
+set Mic 0% mute
+set PCM,1 90% unmute
+set PCM,1 0dB
+set Wave 90% unmute
+set Music 90% unmute
+set AC97 90% unmute
+set 'Master Digital' 90% unmute
+set DAC 90% unmute
+set DAC -2dB
+set DAC,0 90% unmute
+set DAC,0 -2dB
+set DAC,1 90% unmute
+set DAC,1 -2dB
+set Headphone 900% unmute
+set Headphone 0dB
+set Playback 100% unmute
+set HDMI 100% unmute
+set HDMI 0dB
+set S/PDIF 100% unmute
+set S/PDIF 0dB
+set "SB Live Analog/Digital Output Jack" off
+set "Audigy Analog/Digital Output Jack" off
+EOF
+	
+   else
+    alsactl -f /etc/asound.state restore #restore from /etc/asound.state.
+  fi
+ ;;
+ 
+ stop)
+  alsactl -f /etc/asound.state store #save to /etc/asound.state.
+  amixer set Master mute >/dev/null 2>&1
+  [ -d /var/lock/subsys ] && rm -f /var/lock/subsys/alsasound
+ ;;
+esac
+
+###END###

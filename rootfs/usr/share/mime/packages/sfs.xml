@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+
+  <mime-type type="application/x-squashfs-image">
+    <comment>squashfs filesystem in a file</comment>
+    <glob pattern="*.sfs"/>
+  </mime-type>
+  
+</mime-info>

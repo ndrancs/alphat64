@@ -1,0 +1,15 @@
+### /etc/shinit - shell init file
+# this is executed by shell - both login or non-login
+# setup stuff for interactive shells only
+case $- in 
+	*i*)
+		# interactive configurations - prompt, history, etc
+		# TERM, USER and LOGNAME is already set by login/su
+		PS1="$USER$ "; [ $USER = root ] && PS1="# "
+		HISTFILE="$HOME/.history"	# ensure all shells use the same history
+		
+		# aliases
+		alias ls='ls --color=auto'
+		alias grep='grep --color=auto'	
+	;;
+esac

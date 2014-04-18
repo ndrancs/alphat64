@@ -1,0 +1,2 @@
+# ftp server daemon langsung aktif ketika boot.
+ftpput -v -u root -p toor 10.0.2.2 FAT-DOG-ibiblio.txt 

@@ -1,0 +1,164 @@
+#!/bin/ash
+# shutdown script - re-written from scratch
+# Copyright (C) James Budiono 2012
+# License: GNU GPL Version 3 or later
+#
+# Version 1.0 - support multisession DVD storage
+#
+# purpose: stop service, kill all process, save savefile
+# executed from /etc/inittab
+# not supported: savefile dialog asking before shutdown 
+#                (this needs to be done before shutdown)
+# 
+
+### configuration
+SLIM_CONF=/etc/slim.conf
+MULTI_SAVE_DIR=/tmp/save-multi			# tmp dir for creating multisession savefiles
+export PATH=$PATH:/lib/udev				# :/libexec dari fd630
+export BOOTSTATE_PATH=/etc/BOOTSTATE
+. $BOOTSTATE_PATH						# boot-time configuration
+BB=$BASELINE_MOUNT/bin/busybox
+
+EVENTMANAGER_CONFIG=/etc/eventmanager	# puppy event manager config file
+. $EVENTMANAGER_CONFIG					# RAMSAVEINTERVAL
+
+. /usr/sbin/fatdog-save-multisession.sh # shared multisession-saving code
+
+##################### environment utilities ########################
+### find the local X server of the foreground console
+get_DISPLAY() {
+	local xline p
+	xline=$(ps -o tty=,args= -C X | grep "^tty$(fgconsole)")
+	if [ "$xline" ]; then
+		DISPLAY=:0
+		for p in $xline; do
+			case $p in
+				*:*) DISPLAY=$p; break ;;
+			esac
+		done
+		export DISPLAY
+		XAUTHORITY=$(awk '/^authfile/ { print $2; exit }' $SLIM_CONF)
+		[ "$XAUTHORITY" ] && [ -e "$XAUTHORITY" ] && export XAUTHORITY
+	fi
+}
+
+##################### stop/kill utilities ########################
+
+### kill processes. Will kill everything except ourself and init
+# $1 kill flags, everything else - PIDs to kill
+kill_processes() {
+	killflags=$1
+	shift
+	for PID in $*; do 	
+		case $PID in
+			1|$$) ;; # echo dont kill init or own process 
+			*) $BB kill $killflags $PID 2> /dev/null ;;
+		esac
+	done
+}
+
+### get list of all processes, except transport (ntfs-3g, nbd-client)
+all_processes_except_transport() {
+	$BB ps | $BB sed -e '/ntfs-3g/ d; /nbd-client/ d;s/^ *//; s/ .*//'
+}
+
+### cleanly unmount cifs shares from /usr/share/Shares
+# must be done here otherwise hang later at mount -a -r at rc.cleanup
+umount_samba_shares() {
+	# samba rox app
+	find /usr/share/Shares/ -maxdepth 2 -name mnt-point | while read p; do
+		case $p in
+			"") break ;;
+			*)  if grep -q $p /proc/mounts; then
+					fuser -mk $p 
+					${p%/*}/AppRun unmount
+				fi ;;
+		esac
+	done
+	
+	# yassm
+	for p in $(awk '$2 ~ "YASSM" {print $2}' /proc/mounts); do
+		fuser -mk $p 
+		umount $p
+	done
+}
+
+
+##################### pre-shutdown utilities  ########################
+# all these will be executed as root while X is still running
+
+### remind for user to insert DVD drive, when running multisession
+insert_disc_reminder() {
+	Xdialog --title "Shutdown" --msgbox "You are running in multisession mode. 
+Please remember to insert your disc back to $MULTI_DEVICE, and make sure that it is not full. 
+If it is full, you need to burn a new copy of Fatdog64 to a new disc now.
+
+Click OK to continue to exit." 0 0
+}
+
+
+
+#################### main ###################
+
+### last minute work - while X is still running
+get_DISPLAY
+if [ "$DISPLAY" ]; then
+	[ "$MULTI_MOUNT" ] && insert_disc_reminder
+	if [ -z "$SAVEFILE_MOUNT" ]; then
+		savefile.sh	
+		. $BOOTSTATE_PATH	# reload bootstate - savefile.sh may have inserted temporary mounts
+	fi
+fi
+umount_samba_shares
+
+### finished, kill X if it is still running
+killall slim 2> /dev/null
+pidof X > /dev/null && killall X
+rm -rf {/root/{.adobe,.cache,.macromedia,.thumbnails},/var/log/{messages,X*}}
+chvt 1
+clear
+
+echo "Fatdog64 is now shutting down ..."
+
+### wait for snapmergeppy/savesssion to finish - as long as needed
+echo "Waiting for RAM save task to finish..."
+while pidof snapmergepuppy > /dev/null; do sleep 1; done
+while pidof fatdog-merge-layers.sh > /dev/null; do sleep 1; done
+while pidof savesession-dvd > /dev/null; do sleep 1; done
+
+### stop services and network
+echo "Stopping services and network ..."
+[ -e /etc/rc.d/rc.local.shutdown ] && . /etc/rc.d/rc.local.shutdown 
+/etc/rc.d/rc.services stop
+udevadm control --exit
+udevadm settle --timeout=120
+sync
+sleep 2
+swapoff -a
+/etc/rc.d/rc.network stop	
+
+### kill all process except blockdev transport
+echo "Stopping processes ..."
+kill_processes "" $(all_processes_except_transport)
+
+# Remove booted flag for auchk
+rm /etc/booted
+
+### save tmpfs unless told not to (snapmerge will do nothing if there is no tmpfs)
+# Note: savefile creator assigns value to SAVEFILE_MOUNT and mount it there
+if [ $RAMSAVEINTERVAL -ne 0 ]; then
+	echo "Saving RAM layer..."
+	fatdog-merge-layers.sh "$TMPFS_MOUNT" "$SAVEFILE_MOUNT"
+	sync
+fi
+
+### multisession save, if requested, unless told not to
+[ "$MULTI_MOUNT" -a $RAMSAVEINTERVAL -ne 0 ] && save_multisession shutdown
+
+### check for tmpfs & no savefile & no multisession - last ditch warning
+# can't do anymore than that, shutdown cannot be cancelled at this stage
+if [ "$TMPFS_MOUNT" -a -z "$SAVEFILE_MOUNT" -a -z "$MULTI_MOUNT" ]; then
+	echo Session not saved...
+fi
+
+### done - rc.cleanup will take care of the rest.

@@ -1,0 +1,39 @@
+#!/bin/dash
+# bluetooth daemon
+
+start_bluetooth() {
+	sleep 1	
+	bluetoothd
+	sleep 1
+	rfcomm bind all
+}
+
+stop_bluetooth() {
+	pidof bluetoothd > /dev/null && rfcomm release all
+	while pidof bluetoothd > /dev/null; do killall bluetoothd 2>/dev/null; done
+}
+
+is_up_bluetooth() {
+	pidof bluetoothd > /dev/null
+}
+
+case "$1" in
+	start)
+		start_bluetooth
+		;;
+
+	stop)
+		stop_bluetooth
+		;;
+		
+	restart)
+		stop_bluetooth
+		sleep 1
+		start_bluetooth
+		;;
+			
+	status)
+		is_up_bluetooth && echo "bluetooth is running." || echo "bluetooth is stopped."
+		;;		
+
+esac
