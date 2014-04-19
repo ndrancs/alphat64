@@ -11,6 +11,7 @@ makedepends="intltool"
 
 compile() {
   cd $name-$version
+  cp -af $startdir/left-menu.c src
   ./autogen.sh
   ./configure \
     --prefix=/usr
