@@ -1,0 +1,211 @@
+Here is the notes I used to build alphaOS, it may be a little outdated.
+
+
+
+Scooby and efgee in case you're really interested in making alphaOS from scratch,
+I think it's better to use latest packages and if you want, you can then make new version 15 official and add it to sourceforge.
+I plan to upgrade after release of GTK 3.12. Screenshot bellow shows how would it look start of upgrading to new version:
+
+1 . First in spkg/data/main.config change date
+
+2. install with "make install" in dir spkg/
+
+3. run paka -Sy
+
+4. in scripts/packages.list/packages.list directory type: paka list
+those packages in red, are not available because they were upgraded between those two dates
+( for 32 bit chnage x86_64 with i686 )
+
+5. type: paka shell
+and for packages in red, you find new package name and replace package name in its list.
+
+http://troll.ws/image/ad480837
+http://i.troll.ws/ad480837.png
+
+
+
+
+===== Build an alphaOS system from scratch =====
+
+//Tools needed are available in 'mercurial' and 'make'. So install them with://
+<code>pacman -S mercurial make</code>
+
+**Phase 1**
+
+Main system files in alphaOS are two modules - alpha.sfs and extra.sfs. Those modules are built automatically from spkg packages,
+compiled or in most cases converted from Arch packages. So, before making system modules you must prepare packages.
+To do that first clone two repositories, you need to have mercurial installed:
+<code>
+hg clone https://bitbucket.org/simargl/alphaos
+</code>
+<code>
+hg clone https://bitbucket.org/simargl/spkg
+cd spkg
+make install
+</code>
+
+All packages are divided into 4 groups: 01_core, 02_xorg, 03_extra, 04_devel - first group with added rootfs from
+alphaos directory make alpha.sfs, 2nd and 3rd are extra.sfs. Before you start converting Arch packages first you need to prepare folders:
+<code>
+mkdir -p /mnt/home/data/alphaos/00_linux/spkg
+
+mkdir -p /mnt/home/data/alphaos/01_core/arch
+mkdir -p /mnt/home/data/alphaos/01_core/spkg
+
+mkdir -p /mnt/home/data/alphaos/02_xorg/arch
+mkdir -p /mnt/home/data/alphaos/02_xorg/spkg
+
+mkdir -p /mnt/home/data/alphaos/03_extra/arch
+mkdir -p /mnt/home/data/alphaos/03_extra/spkg
+
+mkdir -p /mnt/home/data/alphaos/04_devel/arch
+mkdir -p /mnt/home/data/alphaos/04_devel/spkg
+</code>
+... and sync pacman's repository base, so you get list of available Arch packages in /var/lib/paka
+(community.list, core.list, extra.list), this uses packages from Arch Rollback Machine.
+<code>
+paka -Syu
+</code>
+Now you can start converting packages, in earlier cloned bitbucket repository you will see folder alphaos/scripts/i686.list,
+change to that directory and start converting base group packages with:
+<code>
+for i in $(cat 01_core.list); do paka -Sd $i;done
+</code>
+After this completes, in /mnt/home/data/spkg you'll have two folders packages and sources, now move those two folders to
+/mnt/home/data/alphaos/01_core/arch.
+Repeat this procedure for packages from other groups: 02_xorg.list, 03_extra.list, 04_devel.list and move converted packages
+and their sources to corresponding directories: 02_xorg, 03_extra, 04_devel in /mnt/home/data/alphaos.
+
+Package linux-api-headers from Arch is needed just temporary, because same named spkg package cannot be compiled if original
+linux-api-headers is not present, but we can't just use Arch package because it is missing aufs header file for compiling aufs-utils.
+So, search for this package with:
+<code>
+paka -Ss linux-api-headers
+</code>
+and convert (currently this is the package name):
+<code>
+paka -Sd linux-api-headers-3.8.4-1-i686.pkg.tar.xz
+</code>
+Just temporary place converted package to /mnt/home/data/alphaos/04_devel/arch/packages. Before moving to second phase you will
+need to compile filesystem package.
+
+**Phase 2**
+
+Now you need to setup build chroot and compile required spkg packages there, so they cannot interfere with the host system.
+To do that change to alphaos/scripts and type:
+<code>
+sh chroot_build min
+</code>
+Minimal chroot will contain packages from three groups: 00_kernel, 01_core and 04_devel, and it will made in /mnt/home/data/spkg/packages/install.
+Now copy spkg bitbucket repository to chroot folder and install spkg package manager before you start compiling:
+<code>
+cd spkg
+make install
+</code>
+Now change to alphaos/def-scripts and copy folders from 00_kernel, 01_core and 04_devel to /mnt/home/data/spkg/def-scripts inside chroot.
+This folder should be there, already created by chroot_build script. Now everything is done inside chroot.
+Connect to the internet,
+<code>
+dhcpcd
+</code>
+Start compiling packages from 04_devel group
+<code>
+spkg -c linux-api-headers
+</code>
+After it compiles you can remove, original Arch linux-api-headers package; change to /mnt/home/data/spkg/packages and type
+<code>
+spkg -r linux-api-headers
+spkg -i linux-api-headers*
+</code>
+Now you can start compiling linux kernel package:
+<code>
+spkg -ci linux
+</code>
+..and packages from the 01_core group:
+<code>
+spkg -ci aufs-util
+spkg -ci filesystem
+spkg -ci fontconfig
+#spkg -ci freetype2
+spkg -ci linux-firmware
+#spkg -ci menu-cache
+#spkg -ci systemd
+</code>
+Now you can move compiled packages to previously prepared folders: 01_core group to /mnt/home/data/alphaos/01_core/spkg/packages,
+01_kernel group that has just linux package to /mnt/home/data/alphaos/00_kernel/spkg/packages and 04_devel to /mnt/home/data/alphaos/04_devel/spkg/packages.
+Don't forget to save boot-${version}.tar.xz and linux_${version}_src.sfs, files produced after kernel compiling, you can move them to
+/mnt/home/data/alphaos/00_kernel/spkg/other.
+
+Now, remove linux-api-headers converted Arch package from /mnt/home/data/alphaos/04_devel/arch/packages.
+
+Now you need to repeat this step with making chroot to compile packages from other two groups: 02_xorg and 03_extra. Change to alphaos/scripts,
+but this time type:
+<code>
+sh chroot_build full
+</code>
+After compiling move packages to their respective folders as explained above. Now you can move on to next phase.
+
+**Phase 3**
+
+Extract /mnt/home/data/alphaos/00_kernel/spkg/other/boot-${version}.tar.xz and copy vmlinuz to /mnt/home/alphaos (OLA /mnt/home/hghome/alphaos I think )
+
+Change to alphaos/scripts and make initrd.gz with:
+<code>
+sh newinit
+</code>
+copy initrd.gz to /mnt/home/alphaos
+
+cp /mnt/home/data/spkg/packages
+
+Now make two main system sfs modules (in alphaos/scripts/functions you can set gzip or xz compression):
+<code>
+sh sfs_build base
+</code>
+copy alpha.sfs to /mnt/home/alphaos
+<code>
+sh sfs_build extra
+</code>
+copy extra.sfs to /mnt/home/alphaos
+
+After that you can create iso images:
+<code>
+sh makeiso -s
+</code>
+for standard desktop iso.
+<code>
+sh makeiso -m
+</code>
+for minimal console-only iso, containing just alpha.sfs (01_core group only)
+
+Package desktop-settings from 03_extra group contains all the settings related to graphical user interface,
+it has all files and folder that will be in the final /root directory, and it defines window manager environment variable in file
+/etc/profile.d/openbox.sh, used to start specific window manager on boot.
+
+================= REFIND.CONF=============
+menuentry "Fatdog64 Linux" {
+	icon /EFI/boot/icons/os_fatdog.icns
+	loader vmlinuz
+	initrd initrd
+	options "savefile=direct:device:sda7:/fd64save"
+	disabled
+}
+
+menuentry "alphat64 without savefile" {
+	icon /EFI/boot/icons/os_linux.icns
+	volume HP4GB
+	loader /14.5_K3.13/vmlinuz_K3.13
+	initrd /14.5_K3.13/initrd1_K3.13
+	options "coldplug DRV_DEBUG basesfs=uuid:4CBF-0C6C:/14.5_K3.13/ZFS/alphat64_14.5.sfs savefile=none showerr dofsck earlyshell lateshell"
+	disabled
+}
+
+menuentry "alphaOS" {
+	icon /EFI/boot/icons/os_linux.icns
+	loader /alphaos/boot/vmlinuz
+	initrd /alphaos/boot/initrfs.img
+	options "from=/alphaos"
+}
+
+linux /alphaos/boot/vmlinuz
+initrd /alphaos/boot/initrfs.img
+append from=/alphaos

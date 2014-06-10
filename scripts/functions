@@ -21,8 +21,8 @@
 ROOTFS="$PWD/../rootfs"
 MAIN_SB="alpha_14.sb"
 EXTRA_SB="extra_14.sb"
-DEVEL_SB="devel64_100.sfs"
-ALPHAT_SB="alphat64_100.sfs"
+DEVEL_SB="devel64_2.sfs"
+ALPHAT_SB="alphat64_2.sfs"
 
 # VARIABLES
 
@@ -41,13 +41,13 @@ EXTRA_SPKG="/mnt/home/data/alphaos/03_extra/spkg/packages"
 DEVEL_ARCH="/mnt/home/data/alphaos/04_devel/arch/packages"
 DEVEL_SPKG="/mnt/home/data/alphaos/04_devel/spkg/packages"
 
-ARMDATE="2014/04/10"
+ARMDATE="2014/06/06"
 
 # INITRAMFS VARIABLES
 
-KERNEL_VERSION="3.14.0-ALPHAOS"
+KERNEL_VERSION="3.14.5-ALPHAOS"
 MODULES_DIR="$pkgdir/linux/install"
-KERNEL_PACKAGE="linux-3.14-1-$CARCH.spkg"
+KERNEL_PACKAGE="linux-3.14.5-1-$CARCH.spkg"
 INITRAMFS_TREE="$PWD/../initramfs"
 
 # MAKEISO VARIABLES
