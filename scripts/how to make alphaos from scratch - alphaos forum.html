@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-gb" xml:lang="en-gb">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="content-style-type" content="text/css" />
+<meta http-equiv="content-language" content="en-gb" />
+<meta http-equiv="imagetoolbar" content="no" />
+<meta name="resource-type" content="document" />
+<meta name="distribution" content="global" />
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+
+<title>alphaos forum &bull; View topic - how to: make alphaos from scratch</title>
+
+<script type='text/javascript' src='http://mod.postimage.org/phpbb3-english-family.js' charset='utf-8'></script>
+
+<link rel="alternate" type="application/atom+xml" title="Feed - alphaos forum" href="http://alphaos.tuxfamily.org/forum/feed.php" /><link rel="alternate" type="application/atom+xml" title="Feed - New Topics" href="http://alphaos.tuxfamily.org/forum/feed.php?mode=topics" /><link rel="alternate" type="application/atom+xml" title="Feed - Forum - Tutorials" href="http://alphaos.tuxfamily.org/forum/feed.php?f=14" /><link rel="alternate" type="application/atom+xml" title="Feed - Topic - how to: make alphaos from scratch" href="http://alphaos.tuxfamily.org/forum/feed.php?f=14&amp;t=1099" />
+
+<!--
+	phpBB style name: prosilver
+	Based on style:   prosilver (this is the default phpBB3 style)
+	Original author:  Tom Beddard ( http://www.subBlue.com/ )
+	Modified by:
+-->
+
+<script type="text/javascript">
+// <![CDATA[
+	var jump_page = 'Enter the page number you wish to go to:';
+	var on_page = '1';
+	var per_page = '';
+	var base_url = '';
+	var style_cookie = 'phpBBstyle';
+	var style_cookie_settings = '; path=/; domain=alphaos.tuxfamily.org';
+	var onload_functions = new Array();
+	var onunload_functions = new Array();
+
+	
+
+	/**
+	* Find a member
+	*/
+	function find_username(url)
+	{
+		popup(url, 760, 570, '_usersearch');
+		return false;
+	}
+
+	/**
+	* New function for handling multiple calls to window.onload and window.unload by pentapenguin
+	*/
+	window.onload = function()
+	{
+		for (var i = 0; i < onload_functions.length; i++)
+		{
+			eval(onload_functions[i]);
+		}
+	};
+
+	window.onunload = function()
+	{
+		for (var i = 0; i < onunload_functions.length; i++)
+		{
+			eval(onunload_functions[i]);
+		}
+	};
+
+// ]]>
+</script>
+<script type="text/javascript" src="./styles/prosilver/template/styleswitcher.js"></script>
+<script type="text/javascript" src="./styles/prosilver/template/forum_fn.js"></script>
+
+<link href="./styles/prosilver/theme/print.css" rel="stylesheet" type="text/css" media="print" title="printonly" />
+<link href="./style.php?id=17&amp;lang=en&amp;sid=4410077487bd458c4913e4b6379338e6" rel="stylesheet" type="text/css" media="screen, projection" />
+
+<link href="./styles/prosilver/theme/normal.css" rel="stylesheet" type="text/css" title="A" />
+<link href="./styles/prosilver/theme/medium.css" rel="alternate stylesheet" type="text/css" title="A+" />
+<link href="./styles/prosilver/theme/large.css" rel="alternate stylesheet" type="text/css" title="A++" />
+
+
+<link rel="shortcut icon" href="http://alphaos.tuxfamily.org/forum/favicon.ico" />
+</head>
+
+<body id="phpbb" class="section-viewtopic ltr">
+
+<div id="wrap">
+	<a id="top" name="top" accesskey="t"></a>
+	<div id="page-header">
+		<div class="headerbar">
+			<div class="inner"><span class="corners-top"><span></span></span>
+
+			<div id="site-description">
+				<a href="http://alphaos.tuxfamily.org/" title="Board index" id="logo"><img src="./styles/prosilver/imageset/site_logo.gif" width="149" height="52" alt="" title="" /></a>
+				<h1>alphaos forum</h1>
+				<p>Lightweight, portable and flexible operating system</p>
+				<p class="skiplink"><a href="#start_here">Skip to content</a></p>
+			</div>
+
+		
+			<div id="search-box">
+				<form action="./search.php?sid=4410077487bd458c4913e4b6379338e6" method="get" id="search">
+				<fieldset>
+					<input name="keywords" id="keywords" type="text" maxlength="128" title="Search for keywords" class="inputbox search" value="Search…" onclick="if(this.value=='Search…')this.value='';" onblur="if(this.value=='')this.value='Search…';" />
+					<input class="button2" value="Search" type="submit" /><br />
+					<a href="./search.php?sid=4410077487bd458c4913e4b6379338e6" title="View the advanced search options">Advanced search</a> <input type="hidden" name="sid" value="4410077487bd458c4913e4b6379338e6" />
+
+				</fieldset>
+				</form>
+			</div>
+		
+
+			<span class="corners-bottom"><span></span></span></div>
+		</div>
+
+		<div class="navbar">
+			<div class="inner"><span class="corners-top"><span></span></span>
+
+			<ul class="linklist navlinks">
+				<li class="icon-home"><a href="./index.php?sid=4410077487bd458c4913e4b6379338e6" accesskey="h">Board index</a>  <strong>&#8249;</strong> <a href="./viewforum.php?f=3&amp;sid=4410077487bd458c4913e4b6379338e6">alphaOS</a> <strong>&#8249;</strong> <a href="./viewforum.php?f=14&amp;sid=4410077487bd458c4913e4b6379338e6">Tutorials</a></li>
+
+				<li class="rightside"><a href="#" onclick="fontsizeup(); return false;" onkeypress="return fontsizeup(event);" class="fontsize" title="Change font size">Change font size</a></li>
+
+				<li class="rightside"><a href="./viewtopic.php?f=14&amp;t=1099&amp;sid=4410077487bd458c4913e4b6379338e6&amp;view=print" title="Print view" accesskey="p" class="print">Print view</a></li>
+			</ul>
+
+			
+
+			<ul class="linklist rightside">
+				<li class="icon-faq"><a href="./faq.php?sid=4410077487bd458c4913e4b6379338e6" title="Frequently Asked Questions">FAQ</a></li>
+				<li class="icon-register"><a href="./ucp.php?mode=register&amp;sid=4410077487bd458c4913e4b6379338e6">Register</a></li>
+					<li class="icon-logout"><a href="./ucp.php?mode=login&amp;sid=4410077487bd458c4913e4b6379338e6" title="Login" accesskey="x">Login</a></li>
+				
+			</ul>
+
+			<span class="corners-bottom"><span></span></span></div>
+		</div>
+
+	</div>
+
+	<a name="start_here"></a>
+	<div id="page-body">
+		
+<h2><a href="./viewtopic.php?f=14&amp;t=1099&amp;sid=4410077487bd458c4913e4b6379338e6">how to: make alphaos from scratch</a></h2>
+<!-- NOTE: remove the style="display: none" when you want to have the forum description on the topic body --><div style="display: none !important;">Tutorials &amp; Tips<br /></div>
+
+<div class="topic-actions">
+
+	<div class="buttons">
+	
+		<div class="locked-icon"><a href="./posting.php?mode=reply&amp;f=14&amp;t=1099&amp;sid=4410077487bd458c4913e4b6379338e6" title="This topic is locked, you cannot edit posts or make further replies."><span></span>Topic locked</a></div>
+	
+	</div>
+
+	
+		<div class="search-box">
+			<form method="get" id="topic-search" action="./search.php?sid=4410077487bd458c4913e4b6379338e6">
+			<fieldset>
+				<input class="inputbox search tiny"  type="text" name="keywords" id="search_keywords" size="20" value="Search this topic…" onclick="if(this.value=='Search this topic…')this.value='';" onblur="if(this.value=='')this.value='Search this topic…';" />
+				<input class="button2" type="submit" value="Search" />
+				<input type="hidden" name="t" value="1099" />
+<input type="hidden" name="sf" value="msgonly" />
+<input type="hidden" name="sid" value="4410077487bd458c4913e4b6379338e6" />
+
+			</fieldset>
+			</form>
+		</div>
+	
+		<div class="pagination">
+			1 post
+			 &bull; Page <strong>1</strong> of <strong>1</strong>
+		</div>
+	
+
+</div>
+<div class="clear"></div>
+
+
+	<div id="p2853" class="post bg2">
+		<div class="inner"><span class="corners-top"><span></span></span>
+
+		<div class="postbody">
+			
+
+			<h3 class="first"><a href="#p2853">how to: make alphaos from scratch</a></h3>
+			<p class="author"><a href="./viewtopic.php?p=2853&amp;sid=4410077487bd458c4913e4b6379338e6#p2853"><img src="./styles/prosilver/imageset/icon_post_target.gif" width="11" height="9" alt="Post" title="Post" /></a>by <strong><a href="./memberlist.php?mode=viewprofile&amp;u=2&amp;sid=4410077487bd458c4913e4b6379338e6" style="color: #990000;" class="username-coloured">simargl</a></strong> &raquo; 10 May 2014, 11:41 </p>
+
+			
+
+			<div class="content">You can build alphaos system with help of this guide on any recent 64-bit Linux operating system (not on 32-bit because chroot will not work). It is required to use linux partition with at least 5 GB of free space mounted on /mnt/home. Tools needed to start are available in packages 'git' and 'make'. So, activate devel bundle or install packages with:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>pacman -S git make</code></dd></dl><br />=========<br /><span style="font-weight: bold"><span style="font-size: 150%; line-height: 116%;">Phase 1</span></span><br />Main system files in alphaOS are two system bundles/modules - alpha.sb and extra.sb. Those modules are built automatically from spkg packages, which are compiled inside chroot or converted from Arch packages. So, before making system modules first step is to prepare needed packages. <br /><br /><span style="font-weight: bold">1.1.)</span><br />First clone alphaos repository, you need to have git installed:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>git clone https://github.com/simargl/alphaos</code></dd></dl><br />In alphaos/spkg/data/main.config you would change variables arm_date and CARCH (these variables define names of spkg packages, used CFLAGS when compiling and date for rollback mirror for Arch packages used by script paka), or you can just proceed with default values, and then install spkg package manager with:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>make install</code></dd></dl><br /><br /><span style="font-weight: bold">1.2.)</span><br />All packages are divided into 4 groups: 01_core, 02_xorg, 03_extra, 04_devel - first group with added rootfs from alphaos directory will make alpha.sb, 2nd and 3rd groups are later compressed as extra.sb. Before you start converting Arch packages first you need to prepare directories:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>mkdir -p /mnt/home/data/alphaos/00_linux/spkg<br />mkdir -p /mnt/home/data/alphaos/01_core/arch<br />mkdir -p /mnt/home/data/alphaos/01_core/spkg<br />mkdir -p /mnt/home/data/alphaos/02_xorg/arch<br />mkdir -p /mnt/home/data/alphaos/02_xorg/spkg<br />mkdir -p /mnt/home/data/alphaos/03_extra/arch<br />mkdir -p /mnt/home/data/alphaos/03_extra/spkg<br />mkdir -p /mnt/home/data/alphaos/04_devel/arch<br />mkdir -p /mnt/home/data/alphaos/04_devel/spkg<br /></code></dd></dl><br />Then sync paka's repository base, so you get list of available Arch packages in /var/lib/paka (community.list, core.list, extra.list), this uses packages from Arch Rollback Machine.<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>paka -Sy</code></dd></dl><br /><br /><span style="font-weight: bold">1.3.)</span><br />Now you can start process of converting Arch Linux packages to spkg packages. In previously cloned bitbucket repository you will see directory alphaos/scripts/packages.list, change to that directory and start converting packages from the base group with:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>for i in $(cat 01_core.list); do paka -Sd $i;done</code></dd></dl><br />After this completes, in /mnt/home/data/spkg you'll have two directories named packages and sources, now move those two directories to /mnt/home/data/alphaos/01_core/arch. Repeat this procedure for packages from other groups: 02_xorg.list, 03_extra.list, 04_devel.list and move converted packages and their sources to corresponding directories: 02_xorg, 03_extra, 04_devel in /mnt/home/data/alphaos.<br /><br /><span style="font-weight: bold">Note:</span><br />Package linux-api-headers from Arch is needed just temporary, because spkg package with same name cannot be compiled if original linux-api-headers is not present. So, search for this package with:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>paka -Ss linux-api-headers</code></dd></dl><br />and convert (currently this is the package name):<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>paka -Sd linux-api-headers-3.10.6-1-x86_64.pkg.tar.xz</code></dd></dl><br />Just temporary place converted package to /mnt/home/data/alphaos/04_devel/arch/packages. Later when linux-api-headers spkg package is compiled inside chroot, you will remove this Arch package.<br /><br /><span style="font-weight: bold">1.4.)</span><br />Before moving to second phase you will need to compile filesystem package. Copy alphaos/def-scripts/01_core/filesystem to /mnt/home/data/spkg/def-scripts, open terminal and type:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>spkg -c filesystem</code></dd></dl><br />Copy resulting package to /mnt/home/data/alphaos/01_core/spkg/packages, then move to 2nd phase.<br /><br />=========<br /><span style="font-weight: bold"><span style="font-size: 150%; line-height: 116%;">Phase 2</span></span><br />Now you need to setup build chroot and compile required spkg packages there, so they cannot interfere with the host system. To do that change to alphaos/scripts and type:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>sh chroot_build min</code></dd></dl><br /><span style="font-weight: bold">2.1.)</span><br />Minimal chroot will contain packages from three groups: 00_linux, 01_core and 04_devel, and it will be made in /mnt/home/data/spkg/packages/install. Now copy spkg directory to chroot because it is needed to install spkg package manager inside chroot before you could start compiling. As before install it with: <br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>make install</code></dd></dl><br /><br /><span style="font-weight: bold">2.2.)</span><br />Now change to alphaos/def-scripts and copy all directories from 00_linux, 01_core and 04_devel to /mnt/home/data/spkg/def-scripts inside chroot. This folder should be there, already created by chroot_build script. Now everything is done inside chroot. <br />Connect to the internet,<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>dhcpcd</code></dd></dl><br />Start compiling packages from 04_devel group<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>spkg -c linux-api-headers</code></dd></dl><br /><br />After it compiles you can remove, original Arch linux-api-headers package; change to /mnt/home/data/spkg/packages and type<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>spkg -r linux-api-headers<br />spkg -i linux-api-headers*<br /></code></dd></dl><br />Then, you can start compiling linux kernel package:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>spkg -c linux</code></dd></dl><br />..and packages from the 01_core group.<br /><br /><span style="font-weight: bold">2.3.)</span><br />Now you can move compiled packages to previously prepared folders: 01_core group to /mnt/home/data/alphaos/01_core/spkg/packages, 00_linux group that has just linux package to /mnt/home/data/alphaos/00_linux/spkg/packages and 04_devel to /mnt/home/data/alphaos/04_devel/spkg/packages. Don't forget to save boot-${version}.tar.xz and linux_${version}_src.sb, files produced after kernel compiling, you move them to /mnt/home/data/alphaos/00_linux/spkg/other. Now, remove linux-api-headers converted Arch package from /mnt/home/data/alphaos/04_devel/arch/packages.<br /><br /><span style="font-weight: bold">2.4.)</span><br />Now you need to repeat this step with making chroot to compile packages from other two groups: 02_xorg and 03_extra. Change to alphaos/scripts, but this time type:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>sh chroot_build full</code></dd></dl><br />After compiling move packages to their respective folders as explained above. Now you can move on to next phase.<br /><br />=========<br /><span style="font-weight: bold"><span style="font-size: 150%; line-height: 116%;">Phase 3</span></span><br />Extract /mnt/home/data/alphaos/00_linux/spkg/other/boot-${version}.tar.xz and copy vmlinuz to /mnt/home/alphaos/boot<br /><br />Change to alphaos/scripts and make initrd.gz with:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>sh newinit</code></dd></dl><br />copy initrfs.img to /mnt/home/alphaos/boot<br /><br />Now make two main system sb modules (in alphaos/scripts/functions you can set gzip or xz compression):<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>sh sb_build base</code></dd></dl><br />copy alpha.sb to /mnt/home/alphaos<br /><br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>sh sb_build extra</code></dd></dl><br />copy extra.sb to /mnt/home/alphaos<br /><br />After that you can create iso images:<br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>sh makeiso -s</code></dd></dl><br />for standard desktop iso.<br /><br /><dl class="codebox"><dt>Code: <a href="#" onclick="selectCode(this); return false;">Select all</a></dt><dd><code>sh makeiso -m</code></dd></dl><br />for minimal console-only iso, containing just alpha.sb (01_core group only)<br /><br />If you have any issue with following this tutorial report it <a href="http://alphaos.tuxfamily.org/forum/viewtopic.php?f=8&amp;t=1097" class="postlink">here</a></div>
+
+			
+
+		</div>
+
+		
+			<dl class="postprofile" id="profile2853">
+			<dt>
+				<a href="./memberlist.php?mode=viewprofile&amp;u=2&amp;sid=4410077487bd458c4913e4b6379338e6"><img src="https://bitbucket-assetroot.s3.amazonaws.com/c/photos/2014/Jan/15/simargl-avatar-2279901032-0.png" width="90" height="90" alt="User avatar" /></a><br />
+				<a href="./memberlist.php?mode=viewprofile&amp;u=2&amp;sid=4410077487bd458c4913e4b6379338e6" style="color: #990000;" class="username-coloured">simargl</a>
+			</dt>
+
+			<dd>Site Admin</dd>
+
+		<dd>&nbsp;</dd>
+
+		<dd><strong>Posts:</strong> 410</dd><dd><strong>Joined:</strong> 16 May 2013, 10:54</dd>
+			<dd>
+				<ul class="profile-icons">
+					<li class="web-icon"><a href="https://github.com/simargl/alphaos" title="WWW: https://github.com/simargl/alphaos"><span>Website</span></a></li>
+				</ul>
+			</dd>
+		
+
+		</dl>
+	
+
+		<div class="back2top"><a href="#wrap" class="top" title="Top">Top</a></div>
+
+		<span class="corners-bottom"><span></span></span></div>
+	</div>
+
+	<hr class="divider" />
+
+
+<div class="topic-actions">
+	<div class="buttons">
+	
+		<div class="locked-icon"><a href="./posting.php?mode=reply&amp;f=14&amp;t=1099&amp;sid=4410077487bd458c4913e4b6379338e6" title="This topic is locked, you cannot edit posts or make further replies."><span></span>Topic locked</a></div>
+	
+	</div>
+
+	
+		<div class="pagination">
+			1 post
+			 &bull; Page <strong>1</strong> of <strong>1</strong>
+		</div>
+	
+</div>
+
+
+	<p></p><p><a href="./viewforum.php?f=14&amp;sid=4410077487bd458c4913e4b6379338e6" class="left-box left" accesskey="r">Return to Tutorials</a></p>
+
+	<form method="post" id="jumpbox" action="./viewforum.php?sid=4410077487bd458c4913e4b6379338e6" onsubmit="if(this.f.value == -1){return false;}">
+
+	
+		<fieldset class="jumpbox">
+	
+			<label for="f" accesskey="j">Jump to:</label>
+			<select name="f" id="f" onchange="if(this.options[this.selectedIndex].value != -1){ document.forms['jumpbox'].submit() }">
+			
+				<option value="-1">Select a forum</option>
+			<option value="-1">------------------</option>
+				<option value="3">alphaOS</option>
+			
+				<option value="4">&nbsp; &nbsp;Announcements</option>
+			
+				<option value="6">&nbsp; &nbsp;General Discussion</option>
+			
+				<option value="14" selected="selected">&nbsp; &nbsp;Tutorials</option>
+			
+				<option value="8">&nbsp; &nbsp;Scripting and Programming</option>
+			
+				<option value="13">&nbsp; &nbsp;Artwork, Presentations and Reviews</option>
+			
+				<option value="9">&nbsp; &nbsp;Misc. &amp; Off Topic</option>
+			
+			</select>
+			<input type="submit" value="Go" class="button2" />
+		</fieldset>
+	</form>
+
+
+	<h3>Who is online</h3>
+	<p>Users browsing this forum: No registered users and 1 guest</p>
+</div>
+
+<div id="page-footer">
+
+	<div class="navbar">
+		<div class="inner"><span class="corners-top"><span></span></span>
+
+		<ul class="linklist">
+			<li class="icon-home"><a href="./index.php?sid=4410077487bd458c4913e4b6379338e6" accesskey="h">Board index</a></li>
+				
+			<li class="rightside"><a href="./memberlist.php?mode=leaders&amp;sid=4410077487bd458c4913e4b6379338e6">The team</a> &bull; <a href="./ucp.php?mode=delete_cookies&amp;sid=4410077487bd458c4913e4b6379338e6">Delete all board cookies</a> &bull; All times are UTC + 1 hour </li>
+		</ul>
+
+		<span class="corners-bottom"><span></span></span></div>
+	</div>
+
+	<div class="copyright">Powered by <a href="https://www.phpbb.com/">phpBB</a>&reg; Forum Software &copy; phpBB Group
+		
+	</div>
+</div>
+
+</div>
+
+<div>
+	<a id="bottom" name="bottom" accesskey="z"></a>
+	
+</div>
+
+</body>
+</html>
